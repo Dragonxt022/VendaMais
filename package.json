@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "backup": "git add . && node -e \"const d=new Date(); const s=d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0')+'-'+d.getSeconds().toString().padStart(2,'0'); require('child_process').execSync('git commit -m \\\"backup ' + s + '\\\"', {stdio: 'inherit'})\"",
+    "reset": "git reset --soft HEAD~1"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
