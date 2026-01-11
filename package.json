@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node ./bin/www  && npm run tailwind:build",
+    "tailwind:build": "tailwindcss -i ./public/stylesheets/input.css -o ./public/stylesheets/style.css",
+    "tailwind:watch": "tailwindcss -i ./public/stylesheets/input.css -o ./public/stylesheets/style.css --watch",
     "backup": "git add . && node -e \"const d=new Date(); const s=d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0')+'-'+d.getSeconds().toString().padStart(2,'0'); require('child_process').execSync('git commit -m \\\"backup ' + s + '\\\"', {stdio: 'inherit'})\"",
     "reset": "git reset --soft HEAD~1"
   },
@@ -21,5 +23,10 @@
     "mysql2": "^3.16.0",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19"
   }
 }

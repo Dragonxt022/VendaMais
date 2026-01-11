@@ -1,55 +1,44 @@
-<style>
-    .dashboard-header {
-        margin-bottom: 3rem;
-    }
-
-    .dashboard-header h1 {
-        font-size: 2.5rem;
-        color: var(--text-main);
-        margin-bottom: 0.5rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .stat-card {
-        background: var(--card-bg);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 1.5rem;
-    }
-
-    .stat-label {
-        color: var(--text-muted);
-        text-transform: uppercase;
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--primary);
-    }
-</style>
-
-<div class="dashboard-header">
-    <h1>Olá, bem-vindo de volta!</h1>
-    <p>Aqui está o resumo do seu negócio hoje.</p>
+<div class="mb-10">
+    <h1 class="text-3xl font-bold text-slate-900">Olá, bem-vindo de volta! 👋</h1>
+    <p class="text-slate-500 mt-1">Aqui está o resumo do seu negócio gastronômico hoje.</p>
 </div>
 
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-label">Pedidos Ativos</div>
-        <div class="stat-value"><%= stats.activeOrders %></div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-food-orange">
+        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Pedidos Hoje</div>
+        <div class="text-3xl font-bold text-slate-900"><%= stats.activeOrders %></div>
+        <div class="mt-2 text-xs text-green-500 font-semibold">+12% que ontem</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Receita Total</div>
-        <div class="stat-value">R$ <%= stats.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></div>
+    
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-orange-800">
+        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Faturamento</div>
+        <div class="text-3xl font-bold text-slate-900">R$ <%= stats.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></div>
+        <div class="mt-2 text-xs text-green-500 font-semibold">+8% esta semana</div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Ticket Médio</div>
+        <div class="text-3xl font-bold text-slate-900 text-food-orange">R$ 45,50</div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Itens no Estoque</div>
+        <div class="text-3xl font-bold text-slate-900 text-orange-950">142</div>
+    </div>
+</div>
+
+<div class="mt-10 bg-white rounded-3xl border border-slate-100 p-8">
+    <h3 class="text-xl font-bold text-slate-900 mb-6">Atividades Recentes</h3>
+    <div class="space-y-4">
+        <!-- Placeholder para atividades -->
+        <div class="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0 text-slate-600">
+            <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-food-orange">
+                🛒
+            </div>
+            <div>
+                <p class="font-medium">Novo pedido recebido #4582</p>
+                <p class="text-xs text-slate-400">Há 5 minutos</p>
+            </div>
+        </div>
     </div>
 </div>

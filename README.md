@@ -18,8 +18,8 @@ O projeto está em fase inicial e atualmente possui apenas a **base da aplicaç�
 ### Frontend
 - EJS (Server Side Rendering)
 - Express EJS Layouts
-- HTML5 / CSS3 (inicial)
-- JavaScript Vanilla (inicial)
+- Tailwind CSS (Interface Padrão)
+- JavaScript Vanilla
 
 ### Infraestrutura
 - dotenv (variáveis de ambiente)
@@ -30,191 +30,79 @@ O projeto está em fase inicial e atualmente possui apenas a **base da aplicaç�
 
 ---
 
-## 📁 Estrutura Inicial do Projeto
+## 📁 Estrutura da Arquitetura SaaS
+
+A aplicação segue uma arquitetura modular dividida em três contextos principais:
 
 ```
 vendamais/
-├── bin/
-│ └── www
-├── config/
-│ └── config.js (Sequelize)
-├── models/
-├── routes/
-│ ├── index.js
-│ └── users.js
+├── controllers/
+│   ├── admin/      # Lógica do painel administrativo
+│   ├── site/       # Lógica do site institucional/landing page
+│   └── user/       # Lógica do painel do cliente/usuário
+├── middleware/     # Filtros de autenticação e validação
+├── routes/         # Definição de rotas por contexto
 ├── views/
-│ ├── layouts/
-│ └── error.ejs
+│   ├── admin/      # Telas administrativas
+│   ├── site/       # Telas do site (Pages e Components)
+│   ├── user/       # Telas do cliente
+│   └── errors/     # Páginas de erro (401, 404, 500, 502)
 ├── public/
+│   ├── stylesheets/ # Tailwind compilado (style.css) e config (input.css)
+│   └── javascripts/
 ├── app.js
-├── .env
-├── package.json
-└── README.md 
-``` 
+├── tailwind.config.js
+└── package.json
+```
 
 ---
 
-## ⚙️ Configuração do Ambiente
+## 🎨 Design e UI
 
-### 1️⃣ Clonar o repositório
-```bash
-git clone <repositorio>
-cd vendamais
-```
-
-### 2️⃣ Instalar dependências
-```bash
-npm install
-```
-
-### 3️⃣ Configurar variáveis de ambiente
-```bash
-cp .env.example .env
-```
-
-### 4️⃣ Iniciar o servidor
-```bash
-npm run dev
-```
-
-### 5️⃣ Acessar a aplicação
-```
-http://localhost:3000
-```
-
---- 
+Utilizamos **Tailwind CSS** para garantir uma interface moderna, rápida e consistente. 
+- **Estilo**: Glassmorphism, tipografia moderna (Outfit) e paleta vibrante.
+- **Compilação**: `npm run tailwind:build` para gerar o CSS final.
+- **Desenvolvimento**: `npm run tailwind:watch` para auto-rebuild durante a criação.
 
 ---
 
-## 🔐 Gestão de Usuários (Planejamento)
+## 🔐 Gestão de Controle (Arquitetura SaaS)
 
-A aplicação utilizará **controle de acesso baseado em papéis (RBAC)**.
-
-### Tipos de Usuário
-- Administrador
-- Gerente
-- Funcionário
-
-### Permissões (exemplo)
-
-| Módulo | Administrador | Gerente | Funcionário |
-|------|--------------|--------|-------------|
-| Usuários | ✔ | ✖ | ✖ |
-| Estoque | ✔ | ✔ | ✔ (limitado) |
-| Relatórios | ✔ | ✔ | ✖ |
-| Configurações | ✔ | ✖ | ✖ |
+- **Controllers**: Toda a lógica de negócio reside nos controllers. Eles processam os dados e os retornam para o roteador.
+- **Roteadores**: Responsáveis por validar a requisição (via middlewares), chamar o controller e renderizar a view final com os dados recebidos.
+- **Middleware**: Gerencia permissões de acesso (ex: garantir que apenas usuários logados acessem `/admin` ou `/users`).
 
 ---
 
-## 📦 Gestão de Estoque (Módulo Inicial)
+## ✅ Checklist — Status Atual
 
-Este será o **primeiro módulo completo** da aplicação.
+### Base e Arquitetura
+- [x] Express e Sequelize configurados
+- [x] Arquitetura SaaS (Admin, User, Site) implementada
+- [x] Controllers separados por contexto
+- [x] Tailwind CSS integrado e configurado
+- [x] Tratamento de erros global (401, 404, 500, 502)
 
-### Categorias
-- Nome
-- Foto
-
-### Fornecedores
-- Nome
-- Contato
-- Observações
-
-### Produtos
-Campos planejados:
-- Foto
-- Nome
-- Valor de compra
-- Valor de venda
-- Quantidade
-- Unidade de medida (QT / KG)
-- Gramatura
-- Quantidade mínima para alerta
-- Código de barras
-- SKU
-- Categoria
-- Fornecedor
-- Produto gerenciável (sim/não)
-- Controle de estoque (sim/não)
-
----
-
-## 📊 Dashboard (Página Inicial)
-
-A página inicial exibirá:
-- Entrada de produtos
-- Saída de produtos
-- Estoque atual
-- Produtos com estoque baixo
-- Histórico de movimentações
-
----
-
-## 🧠 Conceitos Profissionais Aplicados
-
-- Separação de responsabilidades
-- Controle de acesso por papel
-- Histórico de movimentações de estoque
-- Soft delete (planejado)
-- Auditoria de ações críticas
-- Preparação para escalabilidade
-
----
-
-## ✅ Checklist — Próximos Passos
-
-### Base
-- [x] Express configurado
-- [x] Sequelize configurado
-- [x] SQLite no desenvolvimento
-- [x] MySQL preparado para produção
-- [x] Sessões configuradas
-- [x] `.env` configurado
-
-### Autenticação
-- [ ] Model de Usuário
-- [ ] Login
-- [ ] Logout
-- [ ] Middleware de rotas protegidas
-- [ ] Controle de permissões
-
-### Estoque
-- [ ] Model Categoria
-- [ ] Model Fornecedor
-- [ ] Model Produto
-- [ ] Movimentação de estoque
-- [ ] Alerta de estoque baixo
-- [ ] Dashboard inicial
-
-### Frontend Administrativo
-- [ ] Layout base do painel
-- [ ] Menu dinâmico por permissão
-- [ ] Telas de CRUD
-- [ ] Validações de formulário
-
-### Futuro
-- [ ] Relatórios avançados
-- [ ] Exportação PDF / Excel
-- [ ] API pública
-- [ ] Multi-empresa
-- [ ] Logs de auditoria
+### Próximos Passos
+- [ ] Implementar sistema completo de Autenticação (Login/Registro)
+- [ ] Desenvolver telas CRUD para o Módulo de Estoque
+- [ ] Criar componentes reutilizáveis com Tailwind
 
 ---
 
 ## 🚀 Status do Projeto
 
-🟡 **Em desenvolvimento — fase de base**
+🟢 **Arquitetura Base Concluída**
 
-O foco atual é a construção de um **gerenciador de estoque robusto, confiável e profissional**.
+O projeto agora possui uma fundação sólida e escalável, pronta para o desenvolvimento acelerado dos módulos de negócio.
 
 ---
 
-## 📌 Observação Final
+## 📌 Documentação de Fluxo
 
-Este projeto é desenvolvido com foco em:
-- Boas práticas
-- Código limpo
-- Evolução contínua
-- Uso real em ambiente comercial
-- Estamos usando arquitetura MVC para separar as responsabilidades da aplicação.
-- Roteador renderiza a views e controller que irá processar as requisições, que passa por um middleware.
-- As Utils irá conter funções com validações conversões e etc que serão usadas em todo o projeto.
+- **MVC**: Seguimos fielmente o padrão MVC para separação de responsabilidades.
+- **Utils**: Pasta dedicada a funções de validação, conversão e auxiliares globais.
+- **Scripts**: 
+    - `npm start`: Inicia a aplicação.
+    - `npm run tailwind:build`: Compila o CSS.
+    - `npm run tailwind:watch`: Monitora alterações no CSS.

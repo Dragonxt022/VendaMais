@@ -1,69 +1,29 @@
-<style>
-    .hero {
-        text-align: center;
-        padding: 6rem 0;
-        animation: fadeIn 0.8s ease-out;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .hero h1 {
-        font-size: 4.5rem;
-        margin-bottom: 1.5rem;
-        background: linear-gradient(to right, #fff, var(--text-muted));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-        font-size: 1.25rem;
-        color: var(--text-muted);
-        max-width: 600px;
-        margin: 0 auto 3rem;
-    }
-
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 2rem;
-        margin-top: 4rem;
-    }
-
-    .feature-card {
-        background: var(--card-bg);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 2.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-10px);
-        border-color: var(--primary);
-    }
-
-    .feature-card h3 {
-        margin-top: 0;
-        color: var(--text-main);
-        font-size: 1.5rem;
-    }
-</style>
-
-<div class="hero">
-    <h1>Acelere suas Vendas</h1>
-    <p>A plataforma completa para gerir, escalar e automatizar seu negócio digital com inteligência e elegância.</p>
-    <a href="/register" class="btn">Criar Conta Gratuita</a>
+<div class="relative overflow-hidden mb-20">
+    <div class="text-center py-16 px-4">
+        <span class="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-wider text-orange-600 uppercase bg-orange-100 rounded-full">Solução para Gastronomia</span>
+        <h1 class="text-5xl md:text-7xl font-bold text-slate-900 mb-8 leading-tight">
+            Gestão inteligente para seu <span class="text-food-orange">negócio de comida</span>
+        </h1>
+        <p class="text-xl text-slate-500 max-w-2xl mx-auto mb-10">
+            Aumente sua produtividade e controle suas vendas com a plataforma mais rápida do mercado.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/register" class="bg-food-orange text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-orange-600 transition-colors shadow-xl shadow-orange-500/20">Criar Minha Conta</a>
+            <a href="#features" class="bg-white text-slate-900 border border-slate-200 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-50 transition-colors">Conhecer Funcionalidades</a>
+        </div>
+    </div>
 </div>
 
-<div class="features-grid">
+<div id="features" class="grid grid-cols-1 md:grid-cols-3 gap-8">
     <% features.forEach(feature => { %>
-        <div class="feature-card">
-            <h3><%= feature %></h3>
-            <p>Solução otimizada para máxima performance e resultados surpreendentes.</p>
+        <div class="group bg-white p-8 rounded-3xl border border-orange-50 hover:border-food-orange hover:shadow-2xl hover:shadow-orange-200/50 transition-all">
+            <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-food-orange transition-colors">
+                <svg class="w-7 h-7 text-food-orange group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3"><%= feature %></h3>
+            <p class="text-slate-500 leading-relaxed">Desenvolvido sob medida para as necessidades reais do dia a dia da cozinha e gestão.</p>
         </div>
     <% }) %>
 </div>
