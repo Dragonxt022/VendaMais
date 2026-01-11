@@ -2,6 +2,7 @@
   "name": "vendamais",
   "version": "0.0.1",
   "private": true,
+  "license": "GPL-3.0",
   "scripts": {
     "start": "node ./bin/www  && npm run tailwind:build",
     "tailwind:build": "tailwindcss -i ./public/stylesheets/input.css -o ./public/stylesheets/style.css",

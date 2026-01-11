@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - VendaMais</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-900 font-sans antialiased text-slate-100">
+    <div class="flex min-h-screen">
+        <!-- Sidebar Admin -->
+        <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col sticky top-0 h-screen">
+            <div class="p-6">
+                <a href="/" class="text-xl font-bold bg-gradient-to-r from-food-orange to-orange-400 bg-clip-text text-transparent">
+                    VendaMais <span class="text-xs text-slate-500 align-top">Admin</span>
+                </a>
+            </div>
+            
+            <nav class="flex-1 px-4 space-y-1 mt-4 text-sm uppercase tracking-wider font-bold">
+                <a href="/admin" class="flex items-center gap-3 px-4 py-3 text-food-orange bg-white/5 rounded-xl">
+                    SISTEMA
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors">
+                    USUÁRIOS
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors">
+                    FINANCEIRO
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors">
+                    SEGURANÇA
+                </a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-10">
+            <%- body %>
+        </main>
+    </div>
+</body>
+</html>

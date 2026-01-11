@@ -7,7 +7,11 @@ const auth = require('../middleware/auth');
 router.get('/', auth, async function(req, res, next) {
   try {
     const data = await AdminController.index(req, res);
-    res.render('admin/dashboard', { title: data.title, ...data });
+    res.render('admin/dashboard', { 
+      layout: 'admin/layouts/admin',
+      title: data.title, 
+      ...data 
+    });
   } catch (err) {
     next(err);
   }

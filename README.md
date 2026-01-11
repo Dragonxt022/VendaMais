@@ -1,14 +1,17 @@
 # VendaMais
 
-VendaMais é uma aplicação web voltada para **gestão comercial**, com foco inicial em um **gerenciador de estoque profissional**, escalável e preparado para ambientes reais de produção.
+VendaMais é uma aplicação web voltada para **gestão comercial**, focada no setor gastronômico e licenciada sob a **GPL-3.0**. 🎉
 
 O projeto está em fase inicial e atualmente possui apenas a **base da aplicação** configurada.
+
+Consulte o nosso [Guia de Contribuição](CONTRIBUTING.md) para saber como colaborar seguindo nossos padrões de arquitetura e design. 🛠️
 
 ---
 
 ## 🧱 Tecnologias Utilizadas
 
 ### Backend
+
 - Node.js
 - Express.js
 - Sequelize ORM
@@ -84,6 +87,7 @@ Utilizamos **Tailwind CSS** para garantir uma interface moderna, rápida e consi
 - [x] Tratamento de erros global (401, 404, 500, 502)
 
 ### Próximos Passos
+
 - [ ] Implementar sistema completo de Autenticação (Login/Registro)
 - [ ] Desenvolver telas CRUD para o Módulo de Estoque
 - [ ] Criar componentes reutilizáveis com Tailwind

@@ -3,115 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title><%= typeof title !== 'undefined' ? title : 'VendaMais' %></title>
     <link rel="stylesheet" href="/stylesheets/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .glass-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-                        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
-        }
-
-        nav {
-            backdrop-filter: blur(12px);
-            background: rgba(15, 23, 42, 0.8);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .error-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 4rem 2rem;
-            text-align: center;
-            margin-top: 10vh;
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1 { font-size: 4rem; margin: 0; color: var(--primary); }
-        h2 { font-size: 1.5rem; color: var(--text-main); margin-bottom: 1rem; }
-        p { color: var(--text-muted); max-width: 500px; margin: 0 auto 2rem; }
-
-        .btn {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 0.8rem 2rem;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-block;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
-    </style>
 </head>
-<body>
-    <div class="glass-background"></div>
-    <nav>
-        <div class="logo">VendaMais</div>
-        <div>
-            <!-- Links de navegação aqui -->
-        </div>
+<body class="bg-food-light text-slate-900 font-sans antialiased min-h-screen">
+    <div class="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_30%_20%,#ffedd5_0%,transparent_50%),radial-gradient(circle_at_70%_80%,#ffffff_0%,transparent_50%)]"></div>
+    
+    <nav class="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-orange-100 px-6 py-4 flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold bg-gradient-to-r from-food-orange to-orange-700 bg-clip-text text-transparent decoration-none">
+            VendaMais
+        </a>
     </nav>
-    <main class="container">
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <%- body %>
     </main>
 </body>

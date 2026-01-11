@@ -3,7 +3,6 @@ module.exports = (req, res, next) => {
     if (req.session && req.session.user) {
         return next();
     }
-    
     // Se não estiver autenticado, pode redirecionar ou lançar erro 401
     const err = new Error('Não autorizado');
     err.status = 401;
