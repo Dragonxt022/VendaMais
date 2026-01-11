@@ -1,0 +1,55 @@
+<style>
+    .dashboard-header {
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        color: var(--text-main);
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 1.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+</style>
+
+<div class="dashboard-header">
+    <h1>Olá, bem-vindo de volta!</h1>
+    <p>Aqui está o resumo do seu negócio hoje.</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Pedidos Ativos</div>
+        <div class="stat-value"><%= stats.activeOrders %></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Receita Total</div>
+        <div class="stat-value">R$ <%= stats.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></div>
+    </div>
+</div>

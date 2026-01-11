@@ -1,0 +1,69 @@
+<style>
+    .hero {
+        text-align: center;
+        padding: 6rem 0;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero h1 {
+        font-size: 4.5rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(to right, #fff, var(--text-muted));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto 3rem;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 4rem;
+    }
+
+    .feature-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 2.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary);
+    }
+
+    .feature-card h3 {
+        margin-top: 0;
+        color: var(--text-main);
+        font-size: 1.5rem;
+    }
+</style>
+
+<div class="hero">
+    <h1>Acelere suas Vendas</h1>
+    <p>A plataforma completa para gerir, escalar e automatizar seu negócio digital com inteligência e elegância.</p>
+    <a href="/register" class="btn">Criar Conta Gratuita</a>
+</div>
+
+<div class="features-grid">
+    <% features.forEach(feature => { %>
+        <div class="feature-card">
+            <h3><%= feature %></h3>
+            <p>Solução otimizada para máxima performance e resultados surpreendentes.</p>
+        </div>
+    <% }) %>
+</div>

@@ -5,7 +5,74 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Bem vindos ao <%= title %></p>
+    <style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary);
+    }
+
+    .card-title {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .welcome-section {
+        margin-bottom: 3rem;
+    }
+
+    .welcome-section h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(to right, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="welcome-section">
+    <h1>Bem-vindo ao VendaMais</h1>
+    <p>Sua plataforma de sucesso está pronta para escalar.</p>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <div class="card-title">Usuários Ativos</div>
+        <div class="card-value"><%= users %></div>
+    </div>
+    <div class="card">
+        <div class="card-title">Vendas (Mês)</div>
+        <div class="card-value">R$ <%= sales.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></div>
+    </div>
+    <div class="card">
+        <div class="card-title">Planos Ativos</div>
+        <div class="card-value"><%= activePlans %></div>
+    </div>
+</div>
   </body>
 </html>
