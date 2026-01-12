@@ -35,7 +35,7 @@ app.use(session({
 
 // Rotas
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/app', usersRouter);
 app.use('/admin', adminRouter);
 
 

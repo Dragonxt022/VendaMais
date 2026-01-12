@@ -1,0 +1,31 @@
+<div class="max-w-md mx-auto my-16 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-slate-900 mb-2">Bem-vindo de volta!</h1>
+        <p class="text-slate-500">Acesse sua conta para gerenciar seu estoque.</p>
+    </div>
+
+    <% if (typeof error !== 'undefined') { %>
+        <div class="mb-6 p-4 bg-red-100 border border-red-200 text-red-700 rounded-xl text-sm font-medium">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <form action="/login" method="POST" class="space-y-5">
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">E-mail</label>
+            <input type="email" name="email" value="teste@teste.com" required placeholder="seu@email.com" class="w-full px-4 py-3 text-slate-700 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all">
+        </div>
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Senha</label>
+            <input type="password" name="password" value="123456" required placeholder="••••••••" class="w-full px-4 py-3 text-slate-700 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all">
+        </div>
+        
+        <button type="submit" class="w-full bg-food-orange text-white py-4 rounded-xl font-bold hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20">
+            Acessar Painel
+        </button>
+    </form>
+
+    <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+        <p class="text-slate-500 text-sm">Ainda não tem uma conta? <a href="/register" class="text-food-orange font-bold hover:underline">Crie uma agora</a></p>
+    </div>
+</div>

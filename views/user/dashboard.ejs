@@ -5,25 +5,27 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-food-orange">
-        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Pedidos Hoje</div>
-        <div class="text-3xl font-bold text-slate-900"><%= stats.activeOrders %></div>
-        <div class="mt-2 text-xs text-green-500 font-semibold">+12% que ontem</div>
+        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Produtos Ativos</div>
+        <div class="text-3xl font-bold text-slate-900"><%= stats.activeProducts %></div>
+        <div class="mt-2 text-xs text-slate-500 font-semibold">no catálogo</div>
     </div>
     
     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-orange-800">
-        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Faturamento</div>
-        <div class="text-3xl font-bold text-slate-900">R$ <%= stats.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></div>
-        <div class="mt-2 text-xs text-green-500 font-semibold">+8% esta semana</div>
+        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Valor em Estoque</div>
+        <div class="text-3xl font-bold text-slate-900">R$ <%= stats.inventoryValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></div>
+        <div class="mt-2 text-xs text-slate-500 font-semibold">custo total</div>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Ticket Médio</div>
-        <div class="text-3xl font-bold text-slate-900 text-food-orange">R$ 45,50</div>
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-red-500">
+        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Estoque Baixo</div>
+        <div class="text-3xl font-bold text-slate-900 text-red-600"><%= stats.lowStockProducts %></div>
+        <div class="mt-2 text-xs text-red-500 font-semibold">precisam de reposição</div>
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
         <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Itens no Estoque</div>
-        <div class="text-3xl font-bold text-slate-900 text-orange-950">142</div>
+        <div class="text-3xl font-bold text-slate-900 text-orange-950"><%= stats.totalItems %></div>
+        <div class="mt-2 text-xs text-slate-500 font-semibold">unidades totais</div>
     </div>
 </div>
 

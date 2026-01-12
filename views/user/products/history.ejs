@@ -1,0 +1,56 @@
+<div class="mb-8 flex items-center gap-4">
+    <a href="/app/products" class="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all">
+        ←
+    </a>
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">Histórico de Movimentações</h1>
+        <p class="text-slate-500 text-sm mt-1">Detalhamento de entradas, saídas e ajustes</p>
+    </div>
+</div>
+
+<div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Data / Hora</th>
+                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Tipo</th>
+                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Qtd</th>
+                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Motivo</th>
+                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Saldo (Estimado)</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            <% if (movements.length > 0) { %>
+                <% movements.forEach(move => { %>
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-6 py-4 text-sm text-slate-500">
+                            <%= new Date(move.createdAt).toLocaleString('pt-BR') %>
+                        </td>
+                        <td class="px-6 py-4">
+                            <% if (move.type === 'in') { %>
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold font-bold">🟢 Entrada</span>
+                            <% } else if (move.type === 'out') { %>
+                                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">🔴 Saída</span>
+                            <% } else { %>
+                                <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold">🔘 Ajuste</span>
+                            <% } %>
+                        </td>
+                        <td class="px-6 py-4 font-bold text-slate-900">
+                            <%= move.type === 'out' ? '-' : (move.type === 'in' ? '+' : '') %> <%= move.quantity %>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 text-sm">
+                            <%= move.reason || '-' %>
+                        </td>
+                        <td class="px-6 py-4 text-slate-400 text-sm">
+                            -
+                        </td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-slate-400">Nenhum histórico disponível para este produto.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>

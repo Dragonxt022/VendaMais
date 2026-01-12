@@ -1,0 +1,39 @@
+<div class="max-w-md mx-auto my-16 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-slate-900 mb-2">Crie sua conta</h1>
+        <p class="text-slate-500">Junte-se ao VendaMais e revolucione sua gestão.</p>
+    </div>
+
+    <% if (typeof error !== 'undefined') { %>
+        <div class="mb-6 p-4 bg-red-100 border border-red-200 text-red-700 rounded-xl text-sm font-medium">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <form action="/register" method="POST" class="space-y-5">
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Seu Nome</label>
+            <input type="text" name="name" required placeholder="João Silva" class="w-full px-4 py-3 text-slate-700 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all">
+        </div>
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Nome da sua Empresa</label>
+            <input type="text" name="company_name" required placeholder="Ex: Hamburgueria do João" class="w-full px-4 py-3 text-slate-700 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all">
+        </div>
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">E-mail Profissional</label>
+            <input type="email" name="email" required placeholder="joao@empresa.com" class="w-full px-4 py-3 text-slate-700 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all">
+        </div>
+        <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Crie sua Senha</label>
+            <input type="password" name="password" required placeholder="••••••••" class="w-full px-4 py-3 text-slate-700 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all">
+        </div>
+        
+        <button type="submit" class="w-full bg-food-orange text-white py-4 text-slate-700 rounded-xl font-bold hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20">
+            Começar meu Teste Grátis (3 Dias)
+        </button>
+    </form>
+
+    <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+        <p class="text-slate-500 text-sm">Já possui uma conta? <a href="/login" class="text-food-orange font-bold hover:underline">Acesse aqui</a></p>
+    </div>
+</div>

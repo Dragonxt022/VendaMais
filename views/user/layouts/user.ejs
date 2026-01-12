@@ -19,12 +19,26 @@
             </div>
             
             <nav class="flex-1 px-4 space-y-1 mt-4">
-                <a href="/users" class="flex items-center gap-3 px-4 py-3 text-food-orange bg-orange-50 rounded-xl font-bold">
+                <a href="/app" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">
                     <span>📊</span> Dashboard
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">
-                    <span>📦</span> Meus Pedidos
-                </a>
+                <details class="group" id="stock-menu">
+                    <summary class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer list-none select-none">
+                        <span>📦</span> <span class="flex-1 font-medium">Estoque</span>
+                        <span class="text-slate-400 text-xs transition-transform group-open:rotate-180">▼</span>
+                    </summary>
+                    <div class="pl-4 pr-2 space-y-1 mt-1 mb-2">
+                        <a href="/app/products" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-500 rounded-lg hover:text-food-orange hover:bg-orange-50 transition-colors">
+                            Inventário
+                        </a>
+                        <a href="/app/categories" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-500 rounded-lg hover:text-food-orange hover:bg-orange-50 transition-colors">
+                            Categorias
+                        </a>
+                        <a href="/app/suppliers" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-500 rounded-lg hover:text-food-orange hover:bg-orange-50 transition-colors">
+                            Fornecedores
+                        </a>
+                    </div>
+                </details>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 rounded-xl transition-colors">
                     <span>🍴</span> Cardápio
                 </a>
@@ -55,5 +69,26 @@
             </main>
         </div>
     </div>
+    <script>
+        // Simple active state manager
+        const currentPath = window.location.pathname;
+        const links = document.querySelectorAll('nav a');
+        
+        links.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                // Remove default styling
+                link.classList.remove('text-slate-500', 'hover:bg-slate-50');
+                // Add active styling
+                link.classList.add('text-food-orange', 'bg-orange-50', 'font-bold');
+                
+                // If inside details, open it
+                const details = link.closest('details');
+                if (details) {
+                    details.open = true;
+                    details.querySelector('summary').classList.add('text-food-orange', 'bg-orange-50/50');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

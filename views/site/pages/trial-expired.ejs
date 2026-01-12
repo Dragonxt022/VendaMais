@@ -1,0 +1,24 @@
+<div class="min-h-screen pt-20 pb-12 flex flex-col bg-slate-50">
+    <div class="container mx-auto px-4 flex-grow flex items-center justify-center">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 text-center border border-slate-100">
+            <div class="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-clock text-food-orange text-3xl"></i>
+            </div>
+            
+            <h1 class="text-3xl font-bold text-slate-900 mb-4">Ops! Seu teste expirou</h1>
+            <p class="text-slate-600 mb-8">
+                O período de teste da <strong><%= companyName %></strong> chegou ao fim. Esperamos que o VendaMais tenha ajudado você nestes 3 dias!
+            </p>
+            
+            <div class="space-y-4">
+                <a href="https://wa.me/seu-numero" class="block w-full bg-food-orange text-white py-4 rounded-xl font-bold hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20">
+                    Falar com Consultor no WhatsApp
+                </a>
+                
+                <a href="/logout" class="block w-full text-slate-500 py-2 font-medium hover:text-slate-700 transition-all">
+                    Sair da Conta
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
