@@ -43,15 +43,24 @@ class ProfileController {
             await user.update(updateData);
 
             // atualiza sessão
-            req.session.user.name = user.name;
-            req.session.user.avatar = user.avatar;
+            req.session.user = {
+                ...req.session.user,
+                name: user.name,
+                avatar: user.avatar
+            };
 
             req.session.notification = { 
                 type: 'success', 
                 message: 'Seu perfil foi atualizado com sucesso!' 
             };
 
-            return { success: true };
+            // Garante que a sessão seja salva antes de retornar
+            return new Promise((resolve, reject) => {
+                req.session.save((err) => {
+                    if (err) return reject(err);
+                    resolve({ success: true });
+                });
+            });
         } catch (error) {
             throw error;
         }

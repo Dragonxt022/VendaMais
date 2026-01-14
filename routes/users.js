@@ -70,6 +70,45 @@ router.post('/products/:id/update', auth, async function(req, res, next) {
   }
 });
 
+/* POST toggle favorite. */
+router.post('/products/:id/favorite', auth, async function(req, res, next) {
+  try {
+    const result = await ProductController.toggleFavorite(req, res);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* POST duplicate product. */
+router.post('/products/:id/duplicate', auth, async function(req, res, next) {
+  try {
+    const result = await ProductController.duplicateProduct(req, res);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* POST bulk actions. */
+router.post('/products/bulk-delete', auth, async function(req, res, next) {
+  try {
+    const result = await ProductController.bulkDelete(req, res);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/products/bulk-adjust', auth, async function(req, res, next) {
+  try {
+    const result = await ProductController.bulkAdjust(req, res);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* POST record stock movement. */
 router.post('/stock/move', auth, license, async function(req, res, next) {
   try {

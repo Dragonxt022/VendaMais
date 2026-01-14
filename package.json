@@ -4,13 +4,15 @@
   "private": true,
   "license": "GPL-3.0",
   "scripts": {
-    "start": "node --watch ./bin/www  && npm run tailwind:build",
-    "dev": "node --watch ./bin/www",
+    "start": "concurrently \"npm run server:watch\" \"npm run tailwind:watch\"",
+    "dev": "concurrently \"npm run server:watch\" \"npm run tailwind:watch\"",
+    "server:watch": "node --watch ./bin/www",
     "tailwind:build": "tailwindcss -i ./public/stylesheets/input.css -o ./public/stylesheets/style.css",
     "tailwind:watch": "tailwindcss -i ./public/stylesheets/input.css -o ./public/stylesheets/style.css --watch",
     "backup": "git add . && node -e \"const d=new Date(); const s=d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0')+'-'+d.getSeconds().toString().padStart(2,'0'); require('child_process').execSync('git commit -m \\\"backup ' + s + '\\\"', {stdio: 'inherit'})\"",
     "reset": "git reset --soft HEAD~1",
-    "test": "jest"
+    "test": "jest",
+    "db:seed": "node seeders/product_seeder.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.23",
+    "concurrently": "^9.2.1",
     "jest": "^30.2.0",
     "postcss": "^8.5.6",
     "supertest": "^7.2.2",

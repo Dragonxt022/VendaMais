@@ -1,60 +1,132 @@
-<div class="flex justify-between items-center mb-8">
-    <div>
+<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="flex-1">
         <h1 class="text-2xl font-bold text-slate-900">Meu Estoque</h1>
-        <p class="text-slate-500 text-sm mt-1">Gerencie os produtos e quantidades em tempo real</p>
+        <p class="text-slate-500 text-sm mt-1">Gerencie seu inventário de forma eficiente</p>
+        
+        <!-- Controls Bar -->
+        <div class="mt-6 flex flex-wrap items-center gap-4">
+            <div class="relative flex-1 min-w-[300px]">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                <input 
+                    type="text" 
+                    id="productSearch" 
+                    placeholder="Buscar por nome ou SKU..." 
+                    value="<%= filters.search %>"
+                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all outline-none"
+                    onkeyup="debounceSearch(this.value)"
+                >
+            </div>
+            
+            <select id="categoryFilter" onchange="applyFilters()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-food-orange/20">
+                <option value="">Todas as Categorias</option>
+                <% categories.forEach(cat => { %>
+                    <option value="<%= cat.id %>" <%= filters.category_id == cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                <% }) %>
+            </select>
+
+            <select id="limitSelector" onchange="applyFilters()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-food-orange/20">
+                <option value="20" <%= pagination.currentLimit == 20 ? 'selected' : '' %>>20 por página</option>
+                <option value="50" <%= pagination.currentLimit == 50 ? 'selected' : '' %>>50 por página</option>
+                <option value="100" <%= pagination.currentLimit == 100 ? 'selected' : '' %>>100 por página</option>
+            </select>
+        </div>
     </div>
-    <div class="flex gap-4">
-        <%- include('../../partials/ui/button', { text: 'Registrar Movimento', variant: 'secondary', onclick: "toggleModal('moveModal')" }) %>
+    
+    <div class="flex gap-3">
+        <div id="bulkActions" class="hidden flex gap-2">
+            <%- include('../../partials/ui/button', { text: 'Reajuste em Massa', variant: 'secondary', onclick: "openBulkAdjustModal()" }) %>
+            <%- include('../../partials/ui/button', { text: 'Excluir Selecionados', variant: 'danger', onclick: "bulkDelete()" }) %>
+        </div>
         <%- include('../../partials/ui/button', { text: 'Novo Produto', variant: 'primary', onclick: "resetProductModal(); toggleModal('productModal')" }) %>
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <h3 class="text-slate-400 text-xs font-bold uppercase mb-2">Total de Itens</h3>
-        <div class="text-3xl font-bold text-slate-900"><%= products.length %></div>
-    </div>
-    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <h3 class="text-slate-400 text-xs font-bold uppercase mb-2">Abaixo do Mínimo</h3>
-        <div class="text-3xl font-bold text-red-500">
-            <%= products.filter(p => p.stock_quantity <= p.min_stock).length %>
-        </div>
-    </div>
-</div>
-
 <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-    <table class="w-full text-left border-collapse">
-        <thead class="bg-slate-50 border-b border-slate-200">
-            <tr>
-                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Produto</th>
-                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">SKU</th>
-                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Preço</th>
-                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Estoque</th>
-                <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase text-right">Ações</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-            <% if (products.length > 0) { %>
-                <% products.forEach(product => { %>
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4 font-medium text-slate-900"><%= product.name %></td>
-                        <td class="px-6 py-4 text-slate-500 text-sm"><%= product.sku || '-' %></td>
-                        <td class="px-6 py-4 text-slate-900 text-sm font-semibold">R$ <%= product.price.toLocaleString('pt-BR') %></td>
-                        <td class="px-6 py-4">
-                            <% if (product.manage_stock) { %>
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold <%= product.stock_quantity <= product.min_stock ? 'text-red-500' : 'text-slate-900' %>">
-                                        <%= product.stock_quantity %>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                    <th class="pl-6 py-4 w-10">
+                        <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" class="w-4 h-4 rounded border-slate-300 text-food-orange focus:ring-food-orange">
+                    </th>
+                    <th class="px-4 py-4 w-10"></th>
+                    <th class="px-4 py-4 text-slate-500 font-semibold text-xs uppercase cursor-pointer" onclick="toggleSort('name')">
+                        Produto <span class="ml-1 text-[10px]"><%= filters.sort === 'name' ? '▲' : '' %></span>
+                    </th>
+                    <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">SKU</th>
+                    <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Categoria</th>
+                    <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Preço</th>
+                    <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase">Estoque</th>
+                    <th class="px-6 py-4 text-slate-500 font-semibold text-xs uppercase text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100" id="productTableBody">
+                <% if (products.length > 0) { %>
+                    <% products.forEach(product => { %>
+                        <tr class="group hover:bg-slate-50/80 transition-all cursor-pointer" onclick="handleRowClick(event, '<%= product.id %>')">
+                            <td class="pl-6 py-4" onclick="event.stopPropagation()">
+                                <input type="checkbox" name="productSelect" value="<%= product.id %>" onchange="updateBulkUI()" class="w-4 h-4 rounded border-slate-300 text-food-orange focus:ring-food-orange">
+                            </td>
+                            <td class="px-4 py-4" onclick="event.stopPropagation()">
+                                <button onclick="toggleFavorite('<%= product.id %>')" class="text-xl transition-transform hover:scale-125 focus:outline-none">
+                                    <span id="fav-icon-<%= product.id %>" class="<%= product.is_favorite ? 'text-red-500' : 'text-slate-300 grayscale opacity-40 hover:opacity-100 hover:grayscale-0' %>">
+                                        <%= product.is_favorite ? '❤️' : '🤍' %>
                                     </span>
-                                    <span class="text-slate-400 text-xs text-xs">/ min <%= product.min_stock %></span>
+                                </button>
+                            </td>
+                            <td class="px-4 py-4">
+                                <span class="font-medium text-slate-900 block"><%= product.name %></span>
+                                <% if (product.Supplier) { %>
+                                    <span class="text-[10px] text-slate-400 uppercase tracking-wider"><%= product.Supplier.name %></span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-slate-500 text-sm font-mono"><%= product.sku || '-' %></td>
+                            <td class="px-6 py-4">
+                                <% if (product.Category) { %>
+                                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase" style="background-color: <%= product.Category.color %>20; color: <%= product.Category.color %>">
+                                        <%= product.Category.name %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="text-slate-300 text-xs">-</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-slate-900 text-sm font-semibold">R$ <%= product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></td>
+                            <td class="px-6 py-4">
+                                <% if (product.manage_stock) { %>
+                                    <div class="flex flex-col">
+                                        <span class="font-bold <%= product.stock_quantity <= product.min_stock ? 'text-red-500' : 'text-slate-900' %>">
+                                            <%= product.stock_quantity %>
+                                        </span>
+                                        <span class="text-slate-400 text-[10px]">Mín: <%= product.min_stock %></span>
+                                    </div>
+                                <% } else { %>
+                                    <span class="text-slate-300 text-xs">N/A</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
+                                <div class="relative inline-block text-left dropdown">
+                                    <button class="p-2 hover:bg-slate-200 rounded-full transition-colors focus:outline-none">
+                                        ⋮
+                                    </button>
+                                    <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-2">
+                                        <button onclick="prepareEditModal('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span>✏️</span> Editar
+                                        </button>
+                                        <button onclick="duplicateProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span>📋</span> Duplicar
+                                        </button>
+                                        <a href="/app/products/<%= product.id %>/history" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span>🕰️</span> Histórico
+                                        </a>
+                                        <hr class="my-1 border-slate-100">
+                                        <button onclick="deleteProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                            <span>🗑️</span> Excluir
+                                        </button>
+                                    </div>
                                 </div>
-                            <% } else { %>
-                                <span class="text-slate-400 text-sm">N/A</span>
-                            <% } %>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <div class="flex items-center justify-end gap-3">
-                                <button onclick="editProduct(this)" 
+                                
+                                <!-- Hidden data for edit modal -->
+                                <div id="product-data-<%= product.id %>" class="hidden" 
                                     data-id="<%= product.id %>"
                                     data-name="<%= product.name %>"
                                     data-sku="<%= product.sku %>"
@@ -63,23 +135,76 @@
                                     data-min-stock="<%= product.min_stock %>"
                                     data-manage-stock="<%= product.manage_stock %>"
                                     data-category-id="<%= product.category_id %>"
-                                    data-supplier-id="<%= product.supplier_id %>"
-                                    class="text-slate-400 hover:text-food-orange transition-colors" title="Editar">
-                                    ✏️
-                                </button>
-                                <a href="/app/products/<%= product.id %>/history" class="text-food-orange text-sm font-bold hover:underline">Histórico</a>
+                                    data-supplier-id="<%= product.supplier_id %>">
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="8" class="px-6 py-20 text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="text-4xl mb-4">📦</span>
+                                <h3 class="text-slate-900 font-semibold">Nenhum produto encontrado</h3>
+                                <p class="text-slate-400 text-sm">Tente ajustar seus filtros ou busca.</p>
                             </div>
                         </td>
                     </tr>
-                <% }); %>
-            <% } else { %>
-                <tr>
-                    <td colspan="5" class="px-6 py-12 text-center text-slate-400">Nenhum produto em estoque.</td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <% if (pagination.pages > 1) { %>
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+            <div class="text-sm text-slate-500">
+                Mostrando <span class="font-medium text-slate-900"><%= products.length %></span> de <span class="font-medium text-slate-900"><%= pagination.total %></span> resultados
+            </div>
+            <div class="flex gap-2">
+                <button 
+                    onclick="changePage(<%= pagination.currentPage - 1 %>)"
+                    <%= pagination.currentPage === 1 ? 'disabled' : '' %>
+                    class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                    Anterior
+                </button>
+                
+                <div class="flex items-center gap-1">
+                    <% for(let i = 1; i <= pagination.pages; i++) { %>
+                        <% if (i === 1 || i === pagination.pages || (i >= pagination.currentPage - 1 && i <= pagination.currentPage + 1)) { %>
+                            <button 
+                                onclick="changePage(<%= i %>)"
+                                class="w-10 h-10 rounded-lg flex items-center justify-center font-medium transition-colors <%= pagination.currentPage === i ? 'bg-food-orange text-white' : 'hover:bg-slate-200 text-slate-700' %>"
+                            >
+                                <%= i %>
+                            </button>
+                        <% } else if (i === pagination.currentPage - 2 || i === pagination.currentPage + 2) { %>
+                            <span class="text-slate-400 mx-1">...</span>
+                        <% } %>
+                    <% } %>
+                </div>
+
+                <button 
+                    onclick="changePage(<%= pagination.currentPage + 1 %>)"
+                    <%= pagination.currentPage === pagination.pages ? 'disabled' : '' %>
+                    class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                    Próximo
+                </button>
+            </div>
+        </div>
+    <% } %>
 </div>
+
+<!-- Bulk Adjust Modal -->
+<%- include('../../partials/modals/bulk_adjust_modal') %>
+
+<style>
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+</style>
 
 <!-- Modais -->
 <%- include('../../partials/modals/product_modal') %>
