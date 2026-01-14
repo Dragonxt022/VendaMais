@@ -33,6 +33,12 @@ app.use(session({
   }
 }));
 
+// Disponibiliza o usuário para todas as views
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
+
 // Rotas
 app.use('/', indexRouter);
 app.use('/app', usersRouter);

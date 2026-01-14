@@ -1,0 +1,40 @@
+<!-- Modal Movimento -->
+<div id="moveModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="text-xl font-bold text-slate-900">Registrar Movimento</h2>
+            <button onclick="toggleModal('moveModal')" class="text-slate-400 hover:text-slate-600">×</button>
+        </div>
+        <form action="/app/stock/move" method="POST" class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Produto</label>
+                <select name="product_id" required class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                    <% products.forEach(p => { %>
+                        <option value="<%= p.id %>"><%= p.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Tipo</label>
+                    <select name="type" required class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                        <option value="in">Entrada (+)</option>
+                        <option value="out">Saída (-)</option>
+                        <option value="adjustment">Ajuste (Set)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Quantidade</label>
+                    <input type="number" name="quantity" required class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Motivo / Observação</label>
+                <input type="text" name="reason" class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+            </div>
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">Confirmar Registro</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,21 @@
+<% 
+    // Props: text, onclick, type (submit/button), variant (primary/secondary/ghost), extraClasses 
+    const baseClasses = "px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200";
+    const variants = {
+        primary: "bg-food-orange text-white hover:bg-orange-600 shadow-lg shadow-orange-500/20",
+        secondary: "bg-slate-200 text-slate-700 hover:bg-slate-300",
+        dark: "bg-slate-900 text-white hover:bg-slate-800",
+        ghost: "text-slate-400 hover:text-food-orange"
+    };
+    const buttonVariant = typeof variant !== 'undefined' ? variants[variant] : variants.primary;
+    const buttonText = typeof text !== 'undefined' ? text : '';
+%>
+<button 
+    type="<%= typeof type !== 'undefined' ? type : 'button' %>"
+    onclick="<%= typeof onclick !== 'undefined' ? onclick : '' %>"
+    class="<%= baseClasses %> <%= buttonVariant %> <%= typeof extraClasses !== 'undefined' ? extraClasses : '' %>"
+    <% if (typeof id !== 'undefined') { %> id="<%= id %>" <% } %>
+    <% if (typeof title !== 'undefined') { %> title="<%= title %>" <% } %>
+>
+    <%= buttonText %>
+</button>

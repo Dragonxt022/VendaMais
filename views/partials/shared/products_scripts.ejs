@@ -1,0 +1,124 @@
+<script>
+    function toggleModal(id) {
+        document.getElementById(id).classList.toggle('hidden');
+    }
+
+    function toggleStockFields(checkbox) {
+        const fields = document.getElementById('stockFields');
+        if (checkbox.checked) {
+            fields.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+            fields.classList.add('contents');
+            fields.querySelectorAll('input').forEach(i => i.required = true);
+        } else {
+            fields.classList.remove('contents');
+            fields.classList.add('hidden');
+            fields.querySelectorAll('input').forEach(i => i.required = false);
+        }
+    }
+
+    function editProduct(btn) {
+        const modal = document.getElementById('productModal');
+        const form = modal.querySelector('form');
+        const title = modal.querySelector('h2');
+        const submitBtn = modal.querySelector('button[type="submit"]');
+
+        title.innerText = 'Editar Produto';
+        submitBtn.innerText = 'Atualizar Produto';
+        
+        const id = btn.dataset.id;
+        form.action = `/app/products/${id}/update`;
+
+        form.name.value = btn.dataset.name;
+        form.sku.value = btn.dataset.sku;
+        form.price.value = btn.dataset.price;
+        form.cost.value = btn.dataset.cost;
+        form.min_stock.value = btn.dataset.minStock;
+        
+        const manageStock = btn.dataset.manageStock === 'true';
+        form.manage_stock.checked = manageStock;
+        toggleStockFields(form.manage_stock);
+
+        if (form.category_id) form.category_id.value = btn.dataset.categoryId || '';
+        if (form.supplier_id) form.supplier_id.value = btn.dataset.supplierId || '';
+
+        toggleModal('productModal');
+    }
+
+    function resetProductModal() {
+        const modal = document.getElementById('productModal');
+        const form = modal.querySelector('form');
+        form.reset();
+        form.action = '/app/products';
+        form.manage_stock.checked = true;
+        toggleStockFields(form.manage_stock);
+        
+        modal.querySelector('h2').innerText = 'Cadastrar Produto';
+        modal.querySelector('button[type="submit"]').innerText = 'Salvar Produto';
+    }
+
+    async function submitQuickCategory(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new URLSearchParams(new FormData(form));
+
+        try {
+            const res = await fetch('/app/categories', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.category) {
+                    const option = new Option(data.category.name, data.category.id);
+                    const select = document.getElementById('product_category_id');
+                    select.add(option, undefined);
+                    select.value = data.category.id;
+                    toggleModal('quickCategoryModal');
+                    form.reset();
+                    select.classList.add('ring-2', 'ring-green-500');
+                    setTimeout(() => select.classList.remove('ring-2', 'ring-green-500'), 1000);
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function submitQuickSupplier(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new URLSearchParams(new FormData(form));
+
+        try {
+            const res = await fetch('/app/suppliers', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.supplier) {
+                    const option = new Option(data.supplier.name, data.supplier.id);
+                    const select = document.getElementById('product_supplier_id');
+                    select.add(option, undefined);
+                    select.value = data.supplier.id;
+                    toggleModal('quickSupplierModal');
+                    form.reset();
+                    select.classList.add('ring-2', 'ring-green-500');
+                    setTimeout(() => select.classList.remove('ring-2', 'ring-green-500'), 1000);
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+</script>
