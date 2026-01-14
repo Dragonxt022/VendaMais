@@ -4,7 +4,7 @@
   "private": true,
   "license": "GPL-3.0",
   "scripts": {
-    "start": "node ./bin/www  && npm run tailwind:build",
+    "start": "node --watch ./bin/www  && npm run tailwind:build",
     "dev": "node --watch ./bin/www",
     "tailwind:build": "tailwindcss -i ./public/stylesheets/input.css -o ./public/stylesheets/style.css",
     "tailwind:watch": "tailwindcss -i ./public/stylesheets/input.css -o ./public/stylesheets/style.css --watch",
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "connect-session-sequelize": "^8.0.4",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^17.2.3",
@@ -24,6 +25,7 @@
     "express-session": "^1.18.2",
     "http-errors": "~1.6.3",
     "morgan": "^1.10.1",
+    "multer": "^2.0.2",
     "mysql2": "^3.16.0",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7"

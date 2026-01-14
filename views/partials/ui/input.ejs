@@ -1,0 +1,42 @@
+<% 
+    /**
+     * Props:
+     * - label (String)
+     * - name (String)
+     * - value (String)
+     * - type (String) - default: 'text'
+     * - placeholder (String)
+     * - required (Boolean)
+     * - disabled (Boolean)
+     * - helpText (String)
+     * - extraClasses (String)
+     */
+    const inputType = typeof type !== 'undefined' ? type : 'text';
+    const inputValue = typeof value !== 'undefined' ? value : '';
+    const inputName = typeof name !== 'undefined' ? name : '';
+    const inputPlaceholder = typeof placeholder !== 'undefined' ? placeholder : '';
+    const isRequired = typeof required !== 'undefined' && required;
+    const isDisabled = typeof disabled !== 'undefined' && disabled;
+%>
+
+<div class="space-y-2 <%= typeof extraClasses !== 'undefined' ? extraClasses : '' %>">
+    <% if (typeof label !== 'undefined' && label) { %>
+        <label class="block text-sm font-semibold text-slate-700">
+            <%= label %>
+        </label>
+    <% } %>
+    
+    <input
+        type="<%= inputType %>"
+        name="<%= inputName %>"
+        value="<%= inputValue %>"
+        placeholder="<%= inputPlaceholder %>"
+        <%= isRequired ? 'required' : '' %>
+        <%= isDisabled ? 'disabled' : '' %>
+        class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none transition-all duration-200 <%= isDisabled ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : 'focus:border-food-orange focus:ring-4 focus:ring-orange-500/10 hover:border-slate-300' %>"
+    >
+    
+    <% if (typeof helpText !== 'undefined' && helpText) { %>
+        <p class="text-xs text-slate-400 mt-1"><%= helpText %></p>
+    <% } %>
+</div>

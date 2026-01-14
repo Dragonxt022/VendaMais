@@ -23,6 +23,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       references: { model: 'companies', key: 'id' },
     },
+    cpf_cnpj: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    avatar: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     tableName: 'users',
     timestamps: true,

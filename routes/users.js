@@ -5,8 +5,23 @@ const ProductController = require('../controllers/user/ProductController');
 const StockController = require('../controllers/user/StockController');
 const CategoryController = require('../controllers/user/CategoryController');
 const SupplierController = require('../controllers/user/SupplierController');
+const ProfileController = require('../controllers/user/ProfileController');
 const auth = require('../middleware/auth');
 const license = require('../middleware/license');
+const multer = require('multer');
+const path = require('path');
+
+// Configure Multer for avatars
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads/avatars');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
 
 /* GET user dashboard. */
 router.get('/', auth, license, async function(req, res, next) {
@@ -133,6 +148,28 @@ router.post('/suppliers', auth, async function(req, res, next) {
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {
       return res.status(500).json({ error: err.message });
     }
+    next(err);
+  }
+});
+
+/* Profile Routes */
+router.get('/profile', auth, async function(req, res, next) {
+  try {
+    const data = await ProfileController.index(req, res);
+    res.render('user/profile', {
+      layout: 'user/layouts/user',
+      ...data
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/profile', auth, upload.single('avatar'), async function(req, res, next) {
+  try {
+    const result = await ProfileController.update(req, res);
+    res.redirect('/app/profile');
+  } catch (err) {
     next(err);
   }
 });
