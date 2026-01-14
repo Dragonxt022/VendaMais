@@ -109,6 +109,15 @@ router.post('/products/bulk-adjust', auth, async function(req, res, next) {
   }
 });
 
+/* GET search products (predictive). */
+router.get('/products/search', auth, async function(req, res, next) {
+  try {
+    await ProductController.search(req, res);
+  } catch (err) {
+    next(err);
+  }
+});
+
 /* POST record stock movement. */
 router.post('/stock/move', auth, license, async function(req, res, next) {
   try {

@@ -223,5 +223,31 @@ module.exports = {
     } catch (err) {
       throw err;
     }
+  },
+
+  // Lightweight search for autocomplete
+  async search(req, res) {
+    try {
+      const { company_id } = req.user;
+      const { q } = req.query;
+
+      if (!q || q.length < 2) return res.json([]);
+
+      const products = await Product.findAll({
+        where: {
+          company_id,
+          [Op.or]: [
+            { name: { [Op.like]: `%${q}%` } },
+            { sku: { [Op.like]: `%${q}%` } }
+          ]
+        },
+        limit: 10,
+        include: [{ model: Category, attributes: ['name', 'color'] }]
+      });
+
+      return res.json(products);
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
+    }
   }
 };

@@ -1,22 +1,246 @@
 <script>
+    // --- Global State ---
+    let selectedAdjustType = 'price';
+    let searchTimeout;
+
+    // --- Basic Modal Controls ---
     function toggleModal(id) {
         document.getElementById(id).classList.toggle('hidden');
     }
 
-    function toggleStockFields(checkbox) {
-        const fields = document.getElementById('stockFields');
-        if (checkbox.checked) {
-            fields.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
-            fields.classList.add('contents');
-            fields.querySelectorAll('input').forEach(i => i.required = true);
+    // --- Row & Selection Logic ---
+    function handleRowClick(event, id) {
+        // Ignorar se clicar em algo interativo (checkbox, botão, dropdown)
+        if (event.target.closest('button, input, a, .dropdown')) return;
+        prepareEditModal(id);
+    }
+
+    function toggleSelectAll(master) {
+        const checkboxes = document.getElementsByName('productSelect');
+        checkboxes.forEach(cb => cb.checked = master.checked);
+        updateBulkUI();
+    }
+
+    function updateBulkUI() {
+        const checkboxes = document.getElementsByName('productSelect');
+        const selected = Array.from(checkboxes).filter(cb => cb.checked);
+        const bulkDiv = document.getElementById('bulkActions');
+        
+        if (selected.length > 0) {
+            bulkDiv.classList.remove('hidden');
+            document.getElementById('bulkSelectedCount').innerText = `${selected.length} produtos selecionados`;
         } else {
-            fields.classList.remove('contents');
-            fields.classList.add('hidden');
-            fields.querySelectorAll('input').forEach(i => i.required = false);
+            bulkDiv.classList.add('hidden');
+            document.getElementById('selectAll').checked = false;
         }
     }
 
-    function editProduct(btn) {
+    // --- Search & Filters ---
+    async function handlePredictiveSearch(q) {
+        const resultsDiv = document.getElementById('searchResults');
+        if (!q || q.length < 2) {
+            resultsDiv.classList.add('hidden');
+            return;
+        }
+
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(async () => {
+            try {
+                const res = await fetch(`/app/products/search?q=${encodeURIComponent(q)}`);
+                const products = await res.json();
+                
+                if (products.length > 0) {
+                    resultsDiv.innerHTML = products.map(p => `
+                        <div onclick="selectSearchResult('${p.id}')" class="flex items-center justify-between px-6 py-4 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0 transition-colors">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-slate-900">${p.name}</span>
+                                <span class="text-xs text-slate-400 font-mono">${p.sku || 'Sem SKU'}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-bold text-food-orange">R$ ${p.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                ${p.Category ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase" style="background-color: ${p.Category.color}20; color: ${p.Category.color}">${p.Category.name}</span>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                    resultsDiv.classList.remove('hidden');
+                } else {
+                    resultsDiv.innerHTML = '<div class="px-6 py-8 text-center text-slate-400 text-sm">Nenhum produto encontrado</div>';
+                    resultsDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }, 300);
+    }
+
+    function selectSearchResult(id) {
+        // Ao selecionar, podemos filtrar a tabela ou abrir a edição
+        // Por padrão, vamos filtrar a tabela para mostrar apenas este item
+        const dataDiv = document.getElementById(`product-data-${id}`);
+        const searchInput = document.getElementById('productSearch');
+        
+        if (dataDiv) {
+            searchInput.value = dataDiv.dataset.name;
+        }
+        
+        document.getElementById('searchResults').classList.add('hidden');
+        applyFilters();
+    }
+
+    // Fechar resultados ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#productSearch') && !e.target.closest('#searchResults')) {
+            document.getElementById('searchResults').classList.add('hidden');
+        }
+    });
+
+    function debounceSearch(val) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            applyFilters();
+        }, 500);
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('productSearch').value;
+        const category = document.getElementById('categoryFilter').value;
+        const limit = document.getElementById('limitSelector').value;
+        
+        const params = new URLSearchParams(window.location.search);
+        if (search) params.set('search', search); else params.delete('search');
+        if (category) params.set('category_id', category); else params.delete('category_id');
+        if (limit) params.set('limit', limit); else params.delete('limit');
+        params.set('page', 1); // Reset to page 1 on filter
+        
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+    }
+
+    function changePage(page) {
+        const params = new URLSearchParams(window.location.search);
+        params.set('page', page);
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+    }
+
+    // --- Individual Actions (AJAX) ---
+    async function toggleFavorite(id) {
+        try {
+            const res = await fetch(`/app/products/${id}/favorite`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                // Atualizar ícone na tabela
+                const icon = document.getElementById(`fav-icon-${id}`);
+                icon.innerText = data.is_favorite ? '❤️' : '🤍';
+                icon.classList.toggle('text-red-500', data.is_favorite);
+                icon.classList.toggle('text-slate-300', !data.is_favorite);
+                icon.classList.toggle('grayscale', !data.is_favorite);
+                icon.classList.toggle('opacity-40', !data.is_favorite);
+
+                // Atualizar ícone e texto no dropdown
+                const btnIcon = document.getElementById(`fav-btn-icon-${id}`);
+                const btnText = document.getElementById(`fav-btn-text-${id}`);
+                if (btnIcon) btnIcon.innerText = data.is_favorite ? '💔' : '❤️';
+                if (btnText) btnText.innerText = data.is_favorite ? 'Remover Favorito' : 'Favoritar';
+
+                window.notify('Favorito atualizado!', 'success');
+            }
+        } catch (err) {
+            window.notify('Erro ao favoritar', 'error');
+        }
+    }
+
+    async function duplicateProduct(id) {
+        if (!confirm('Deseja duplicar este produto?')) return;
+        try {
+            const res = await fetch(`/app/products/${id}/duplicate`, { method: 'POST' });
+            if (res.ok) {
+                window.notify('Produto duplicado com sucesso!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            }
+        } catch (err) {
+            window.notify('Erro ao duplicar produto', 'error');
+        }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+        // Reutilizar a lógica de bulk delete para um único item se o controller permitir
+        // Ou implementar um delete específico. Por simplicidade, usaremos o bulkDelete.
+        performBulkDelete([id]);
+    }
+
+    // --- Bulk Actions ---
+    async function bulkDelete() {
+        const selected = Array.from(document.getElementsByName('productSelect'))
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+            
+        if (selected.length === 0) return;
+        if (!confirm(`Deseja excluir ${selected.length} produtos permanentemente?`)) return;
+        
+        performBulkDelete(selected);
+    }
+
+    async function performBulkDelete(ids) {
+        try {
+            const res = await fetch('/app/products/bulk-delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids })
+            });
+            if (res.ok) {
+                window.notify(`${ids.length} produto(s) excluído(s)!`, 'success');
+                setTimeout(() => location.reload(), 1000);
+            }
+        } catch (err) {
+            window.notify('Erro ao excluir produtos', 'error');
+        }
+    }
+
+    function openBulkAdjustModal() {
+        const selected = Array.from(document.getElementsByName('productSelect')).filter(cb => cb.checked);
+        document.getElementById('bulkSelectedCount').innerText = `${selected.length} produtos selecionados para reajuste`;
+        setAdjustType('price');
+        toggleModal('bulkAdjustModal');
+    }
+
+    function setAdjustType(type) {
+        selectedAdjustType = type;
+        document.querySelectorAll('.adjust-type-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.type === type);
+        });
+    }
+
+    async function submitBulkAdjust() {
+        const ids = Array.from(document.getElementsByName('productSelect'))
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+            
+        const value = document.getElementById('adjustValue').value;
+        const mode = document.querySelector('input[name="adjustMode"]:checked').value;
+        
+        if (!value) return window.notify('Informe um valor para o reajuste', 'warning');
+
+        try {
+            const res = await fetch('/app/products/bulk-adjust', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids, type: selectedAdjustType, value, mode })
+            });
+
+            if (res.ok) {
+                window.notify('Reajuste aplicado com sucesso!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            }
+        } catch (err) {
+            window.notify('Erro ao aplicar reajuste', 'error');
+        }
+    }
+
+    // --- Adaptations for Existing Modals ---
+    function prepareEditModal(id) {
+        const dataDiv = document.getElementById(`product-data-${id}`);
+        if (!dataDiv) return;
+
         const modal = document.getElementById('productModal');
         const form = modal.querySelector('form');
         const title = modal.querySelector('h2');
@@ -24,22 +248,20 @@
 
         title.innerText = 'Editar Produto';
         submitBtn.innerText = 'Atualizar Produto';
-        
-        const id = btn.dataset.id;
         form.action = `/app/products/${id}/update`;
 
-        form.name.value = btn.dataset.name;
-        form.sku.value = btn.dataset.sku;
-        form.price.value = btn.dataset.price;
-        form.cost.value = btn.dataset.cost;
-        form.min_stock.value = btn.dataset.minStock;
+        form.name.value = dataDiv.dataset.name;
+        form.sku.value = dataDiv.dataset.sku;
+        form.price.value = dataDiv.dataset.price;
+        form.cost.value = dataDiv.dataset.cost;
+        form.min_stock.value = dataDiv.dataset.minStock;
         
-        const manageStock = btn.dataset.manageStock === 'true';
+        const manageStock = dataDiv.dataset.manageStock === 'true';
         form.manage_stock.checked = manageStock;
         toggleStockFields(form.manage_stock);
 
-        if (form.category_id) form.category_id.value = btn.dataset.categoryId || '';
-        if (form.supplier_id) form.supplier_id.value = btn.dataset.supplierId || '';
+        if (form.category_id) form.category_id.value = dataDiv.dataset.categoryId || '';
+        if (form.supplier_id) form.supplier_id.value = dataDiv.dataset.supplierId || '';
 
         toggleModal('productModal');
     }
@@ -56,69 +278,61 @@
         modal.querySelector('button[type="submit"]').innerText = 'Salvar Produto';
     }
 
+    function toggleStockFields(checkbox) {
+        const fields = document.getElementById('stockFields');
+        if (checkbox.checked) {
+            fields.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+            fields.classList.add('contents');
+            fields.querySelectorAll('input').forEach(i => i.required = true);
+        } else {
+            fields.classList.remove('contents');
+            fields.classList.add('hidden');
+            fields.querySelectorAll('input').forEach(i => i.required = false);
+        }
+    }
+
+    // --- Quick Entry AJAX (Simplified/Maintained) ---
     async function submitQuickCategory(e) {
         e.preventDefault();
-        const form = e.target;
-        const formData = new URLSearchParams(new FormData(form));
-
+        const formData = new URLSearchParams(new FormData(e.target));
         try {
             const res = await fetch('/app/categories', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
             });
-            
             if (res.ok) {
                 const data = await res.json();
                 if (data.success && data.category) {
-                    const option = new Option(data.category.name, data.category.id);
                     const select = document.getElementById('product_category_id');
-                    select.add(option, undefined);
+                    select.add(new Option(data.category.name, data.category.id));
                     select.value = data.category.id;
                     toggleModal('quickCategoryModal');
-                    form.reset();
-                    select.classList.add('ring-2', 'ring-green-500');
-                    setTimeout(() => select.classList.remove('ring-2', 'ring-green-500'), 1000);
+                    e.target.reset();
                 }
             }
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     }
 
     async function submitQuickSupplier(e) {
         e.preventDefault();
-        const form = e.target;
-        const formData = new URLSearchParams(new FormData(form));
-
+        const formData = new URLSearchParams(new FormData(e.target));
         try {
             const res = await fetch('/app/suppliers', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
             });
-            
             if (res.ok) {
                 const data = await res.json();
                 if (data.success && data.supplier) {
-                    const option = new Option(data.supplier.name, data.supplier.id);
                     const select = document.getElementById('product_supplier_id');
-                    select.add(option, undefined);
+                    select.add(new Option(data.supplier.name, data.supplier.id));
                     select.value = data.supplier.id;
                     toggleModal('quickSupplierModal');
-                    form.reset();
-                    select.classList.add('ring-2', 'ring-green-500');
-                    setTimeout(() => select.classList.remove('ring-2', 'ring-green-500'), 1000);
+                    e.target.reset();
                 }
             }
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     }
 </script>

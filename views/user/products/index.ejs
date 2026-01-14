@@ -13,8 +13,12 @@
                     placeholder="Buscar por nome ou SKU..." 
                     value="<%= filters.search %>"
                     class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all outline-none"
-                    onkeyup="debounceSearch(this.value)"
+                    onkeyup="handlePredictiveSearch(this.value)"
+                    onfocus="handlePredictiveSearch(this.value)"
                 >
+                <div id="searchResults" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] max-h-80 overflow-y-auto">
+                    <!-- Results will be injected here -->
+                </div>
             </div>
             
             <select id="categoryFilter" onchange="applyFilters()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-food-orange/20">
@@ -118,6 +122,12 @@
                                         <a href="/app/products/<%= product.id %>/history" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                                             <span>🕰️</span> Histórico
                                         </a>
+                                        <button onclick="toggleFavorite('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span id="fav-btn-icon-<%= product.id %>"><%= product.is_favorite ? '💔' : '❤️' %></span> 
+                                            <span id="fav-btn-text-<%= product.id %>">
+                                                <%= product.is_favorite ? 'Remover Favorito' : 'Favoritar' %>
+                                            </span>
+                                        </button>
                                         <hr class="my-1 border-slate-100">
                                         <button onclick="deleteProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
                                             <span>🗑️</span> Excluir
