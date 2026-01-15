@@ -8,13 +8,20 @@ Consulte o nosso [Guia de Contribuição](CONTRIBUTING.md) para saber como colab
 
 ---
 
-## Algumas imagens do Gerenciamento
+## 📸 Demonstração do Sistema
 
-![image](https://github.com/Dragonxt022/VendaMais/imagem_projeto/01.png)
-![image](https://github.com/Dragonxt022/VendaMais/imagem_projeto/02.png)
-![image](https://github.com/Dragonxt022/VendaMais/imagem_projeto/03.png)
-![image](https://github.com/Dragonxt022/VendaMais/imagem_projeto/04.png)
-![image](https://github.com/Dragonxt022/VendaMais/imagem_projeto/05.png)
+Abaixo, apresentamos as primeiras interfaces da aplicação, desenvolvidas com foco na experiência do usuário e agilidade visual.
+
+<div align="center">
+  <img src="imagem_projeto/01.png" alt="Dashboard Principal" width="850px">
+  <p><i>Painel Geral de Indicadores</i></p>
+  <br>
+  <img src="imagem_projeto/02.png" alt="Gestão de Produtos" width="400px">
+  <img src="imagem_projeto/03.png" alt="Controle de Estoque" width="400px">
+  <br>
+  <img src="imagem_projeto/04.png" alt="Interface de Usuário" width="400px">
+  <img src="imagem_projeto/05.png" alt="Configurações" width="400px">
+</div>
 
 ## 🧱 Tecnologias Utilizadas
 
