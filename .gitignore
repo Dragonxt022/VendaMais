@@ -1,3 +1,8 @@
 .env
 database/database.sqlite
 node_modules
+node_modules/
+coverage/
+public/uploads/
+*.log
+database.sqlite

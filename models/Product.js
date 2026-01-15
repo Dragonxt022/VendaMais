@@ -19,8 +19,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    ean: {
+      type: DataTypes.STRING(13),
+      allowNull: true,
+    },
     sku: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     description: {
