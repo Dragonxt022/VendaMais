@@ -210,6 +210,20 @@ regras_validacao:
     - "sugestão de categoria improvável"
 ```
 
+### 4.4 Integração com Provedores Externos
+O sistema consumirá dados de APIs de terceiros para enriquecer o catálogo inicial:
+- **Bluesoft Cosmos:** Principal fonte de GTIN/EAN brasileira com dados fiscais e tributários.
+- **Google Books/Open Library:** Para itens de mídia e livros (ISBN/EAN).
+- **APIs de Fabricantes:** Integração direta via portais para validação de dados técnicos oficiais.
+
+### 4.5 Algoritmo de Consenso e Resolução de Conflitos
+Para gerenciar dados provenientes de "crowdsourcing", aplicamos o sistema de **Trust Score**:
+1. **Divergência de Nome:** Entre duas fontes, prevalece a de maior Trust Score (Moderador > Fabricante > Usuário Verificado).
+2. **Similaridade Textual:** Uso de *Levenshtein Distance* para detectar nomes duplicados com pequenas variações ortográficas.
+3. **Decay de Confiança:** Registros pendentes sem novas confirmações perdem 5% de pontuação a cada 30 dias de inatividade.
+
+---
+
 ---
 
 ## 5. Fluxos de Cadastro de Produtos
@@ -1911,10 +1925,10 @@ A execução disciplinada deste plano criará não apenas um produto, mas uma **
 
 ---
 
-*Documento atualizado em: {{data_atual}}*  
-*Versão: 3.0*  
-*Status: Planejamento Avançado*  
-*Próxima revisão: 30 dias*  
+*Documento atualizado em: 14/01/2026*  
+*Versão: 3.1*  
+*Status: Desenvolvimento de Core Features*  
+*Próxima revisão: 15 dias*  
 
 **Equipe Responsável:**  
 - Product Owner: [Nome]  

@@ -5,7 +5,7 @@ const fs = require('fs');
 class ProfileController {
     async index(req, res) {
         try {
-            const user = await User.findByPk(req.user.id);
+            const user = await User.findByPk(req.session.user.id);
             return {
                 title: 'Meu Perfil - VendaMais',
                 user
@@ -15,54 +15,51 @@ class ProfileController {
         }
     }
 
-        async update(req, res) {
+    async update(req, res) {
         try {
-            const { name, cpf_cnpj } = req.body;
-            const user = await User.findByPk(req.user.id);
+            const { name, email, cpf_cnpj } = req.body;
+            const userId = req.session.user.id;
 
-            const updateData = { name, cpf_cnpj };
+            if (!name || !email) {
+                const user = await User.findByPk(userId);
+                return res.render('user/profile', {
+                    layout: 'user/layouts/user',
+                    title: 'Meu Perfil - VendaMais',
+                    user,
+                    error: 'Nome e e-mail são obrigatórios'
+                });
+            }
+
+            const user = await User.findByPk(userId);
+            const updateData = { name, email, cpf_cnpj };
 
             if (req.file) {
-                // remove avatar antigo, se existir
                 if (user.avatar) {
-                    const oldAvatarPath = path.join(
-                        __dirname,
-                        '../../../public',
-                        user.avatar
-                    );
-
+                    const oldAvatarPath = path.join(__dirname, '../../../public', user.avatar);
                     if (fs.existsSync(oldAvatarPath)) {
                         fs.unlinkSync(oldAvatarPath);
                     }
                 }
-
-                // salva novo avatar
                 updateData.avatar = `/uploads/avatars/${req.file.filename}`;
             }
 
             await user.update(updateData);
 
-            // atualiza sessão
-            req.session.user = {
-                ...req.session.user,
-                name: user.name,
-                avatar: user.avatar
-            };
+            // Atualiza sessão com novos dados
+            req.session.user.name = user.name;
+            req.session.user.email = user.email;
+            req.session.user.avatar = user.avatar;
 
             req.session.notification = { 
                 type: 'success', 
                 message: 'Seu perfil foi atualizado com sucesso!' 
             };
 
-            // Garante que a sessão seja salva antes de retornar
-            return new Promise((resolve, reject) => {
-                req.session.save((err) => {
-                    if (err) return reject(err);
-                    resolve({ success: true });
-                });
+            req.session.save(() => {
+                res.redirect('/app/profile');
             });
         } catch (error) {
-            throw error;
+            next(error);
         }
     }
 }

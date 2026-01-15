@@ -1,47 +1,62 @@
-<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-    <div class="flex-1">
-        <h1 class="text-2xl font-bold text-slate-900">Meu Estoque</h1>
-        <p class="text-slate-500 text-sm mt-1">Gerencie seu inventário de forma eficiente</p>
-        
-        <!-- Controls Bar -->
-        <div class="mt-6 flex flex-wrap items-center gap-4">
-            <div class="relative flex-1 min-w-[300px]">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
-                <input 
-                    type="text" 
-                    id="productSearch" 
-                    placeholder="Buscar por nome ou SKU..." 
-                    value="<%= filters.search %>"
-                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all outline-none"
-                    onkeyup="handlePredictiveSearch(this.value)"
-                    onfocus="handlePredictiveSearch(this.value)"
-                >
-                <div id="searchResults" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] max-h-80 overflow-y-auto">
-                    <!-- Results will be injected here -->
-                </div>
+<div class="mb-8 p-1">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Meu Estoque</h1>
+            <p class="text-slate-500 text-sm mt-1">Gerencie seu inventário de forma eficiente</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="bulkActions" class="hidden flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-2xl border border-orange-100 animate-in fade-in slide-in-from-right-4 duration-300">
+                <span class="text-xs font-bold text-food-orange mr-2" id="bulkSelectedCount"></span>
+                <button onclick="openBulkAdjustModal()" class="px-3 py-1.5 bg-white border border-orange-200 text-food-orange rounded-xl text-xs font-bold hover:bg-orange-50 transition-all">
+                    ⚖️ Reajuste
+                </button>
+                <button onclick="bulkDelete()" class="px-3 py-1.5 bg-white border border-red-100 text-red-500 rounded-xl text-xs font-bold hover:bg-red-50 transition-all">
+                    🗑️ Excluir
+                </button>
             </div>
-            
-            <select id="categoryFilter" onchange="applyFilters()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-food-orange/20">
-                <option value="">Todas as Categorias</option>
-                <% categories.forEach(cat => { %>
-                    <option value="<%= cat.id %>" <%= filters.category_id == cat.id ? 'selected' : '' %>><%= cat.name %></option>
-                <% }) %>
-            </select>
-
-            <select id="limitSelector" onchange="applyFilters()" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-food-orange/20">
-                <option value="20" <%= pagination.currentLimit == 20 ? 'selected' : '' %>>20 por página</option>
-                <option value="50" <%= pagination.currentLimit == 50 ? 'selected' : '' %>>50 por página</option>
-                <option value="100" <%= pagination.currentLimit == 100 ? 'selected' : '' %>>100 por página</option>
-            </select>
+            <%- include('../../partials/ui/button', { text: 'Registrar Movimento', variant: 'secondary', onclick: "toggleModal('moveModal')" }) %>
+            <%- include('../../partials/ui/button', { text: 'Novo Produto', variant: 'primary', onclick: "resetProductModal(); toggleModal('productModal')" }) %>
         </div>
     </div>
     
-    <div class="flex gap-3">
-        <div id="bulkActions" class="hidden flex gap-2">
-            <%- include('../../partials/ui/button', { text: 'Reajuste em Massa', variant: 'secondary', onclick: "openBulkAdjustModal()" }) %>
-            <%- include('../../partials/ui/button', { text: 'Excluir Selecionados', variant: 'danger', onclick: "bulkDelete()" }) %>
+    <!-- Controls Bar -->
+    <div class="mt-8 flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+        <div class="relative flex-1 min-w-[300px]">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+            <input 
+                type="text" 
+                id="productSearch" 
+                placeholder="Buscar por nome ou SKU..." 
+                value="<%= filters.search %>"
+                class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-food-orange/20 focus:border-food-orange transition-all outline-none text-sm"
+                onkeyup="handlePredictiveSearch(this.value)"
+                onfocus="handlePredictiveSearch(this.value)"
+            >
+            <div id="searchResults" class="hidden absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] max-h-80 overflow-y-auto">
+                <!-- Results will be injected here -->
+            </div>
         </div>
-        <%- include('../../partials/ui/button', { text: 'Novo Produto', variant: 'primary', onclick: "resetProductModal(); toggleModal('productModal')" }) %>
+        
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Categoria:</span>
+                <select id="categoryFilter" onchange="applyFilters()" class="pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-food-orange/20 text-sm appearance-none cursor-pointer">
+                    <option value="">Todas</option>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat.id %>" <%= filters.category_id == cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Exibir:</span>
+                <select id="limitSelector" onchange="applyFilters()" class="pl-3 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-food-orange/20 text-sm appearance-none cursor-pointer">
+                    <option value="20" <%= pagination.currentLimit == 20 ? 'selected' : '' %>>20</option>
+                    <option value="50" <%= pagination.currentLimit == 50 ? 'selected' : '' %>>50</option>
+                    <option value="100" <%= pagination.currentLimit == 100 ? 'selected' : '' %>>100</option>
+                </select>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -108,30 +123,42 @@
                                 <% } %>
                             </td>
                             <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
-                                <div class="relative inline-block text-left dropdown">
-                                    <button class="p-2 hover:bg-slate-200 rounded-full transition-colors focus:outline-none">
-                                        ⋮
+                                <div class="relative inline-block text-left">
+                                    <button 
+                                        onclick="toggleDropdown(event, 'dropdown-<%= product.id %>')"
+                                        class="p-2 hover:bg-slate-200 rounded-full transition-colors focus:outline-none text-slate-400 hover:text-slate-600"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                        </svg>
                                     </button>
-                                    <div class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 py-2">
-                                        <button onclick="prepareEditModal('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span>✏️</span> Editar
+                                    <div id="dropdown-<%= product.id %>" class="dropdown-menu hidden absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[60] py-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                                        <div class="px-4 py-2 border-b border-slate-50 mb-1">
+                                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Opções</p>
+                                        </div>
+                                        <button onclick="prepareEditModal('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span>✏️</span> Editar Produto
                                         </button>
-                                        <button onclick="duplicateProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span>📋</span> Duplicar
+                                        <button onclick="prepareMoveModal('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span>📦</span> Ajustar Estoque
                                         </button>
-                                        <a href="/app/products/<%= product.id %>/history" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span>🕰️</span> Histórico
+                                        <button onclick="duplicateProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span>📋</span> Duplicar Item
+                                        </button>
+                                        <a href="/app/products/<%= product.id %>/history" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                            <span>🕰️</span> Histórico de Estoque
                                         </a>
-                                        <button onclick="toggleFavorite('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                                        <button onclick="toggleFavorite('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                                             <span id="fav-btn-icon-<%= product.id %>"><%= product.is_favorite ? '💔' : '❤️' %></span> 
                                             <span id="fav-btn-text-<%= product.id %>">
                                                 <%= product.is_favorite ? 'Remover Favorito' : 'Favoritar' %>
                                             </span>
                                         </button>
-                                        <hr class="my-1 border-slate-100">
-                                        <button onclick="deleteProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                            <span>🗑️</span> Excluir
-                                        </button>
+                                        <div class="border-t border-slate-100 mt-1 pt-1">
+                                            <button onclick="deleteProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                                <span>🗑️</span> Excluir Produto
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 

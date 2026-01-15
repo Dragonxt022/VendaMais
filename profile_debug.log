@@ -1,0 +1,159 @@
+  console.log
+    [dotenv@17.2.3] injecting env (8) from .env -- tip: ??????? backup and recover secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+[0mPOST /login [36m302[0m 77.888 ms - 26[0m
+[0mGET /app/profile [32m200[0m 16.297 ms - 18254[0m
+[0mPOST /login [36m302[0m 62.844 ms - 26[0m
+  console.log
+    Update Data: {
+      name: 'Updated Name',
+      email: 'updated@test.com',
+      cpf_cnpj: undefined
+    }
+
+      at ProfileController.log [as update] (controllers/user/ProfileController.js:46:21)
+
+  console.log
+    User before update: {
+      id: 1,
+      name: 'Profile User',
+      email: 'profile@test.com',
+      password_hash: '$2b$10$wp7KoTLCNtK1omsh1higlOJWtHScw2pgRiVuOE8CUS9MWldWbv74a',
+      role: 'user',
+      company_id: 1,
+      cpf_cnpj: null,
+      avatar: null,
+      createdAt: 2026-01-14T22:26:36.147Z,
+      updatedAt: 2026-01-14T22:26:36.147Z,
+      deletedAt: null
+    }
+
+      at ProfileController.log [as update] (controllers/user/ProfileController.js:47:21)
+
+  console.log
+    User after update: {
+      id: 1,
+      name: 'Updated Name',
+      email: 'updated@test.com',
+      password_hash: '$2b$10$wp7KoTLCNtK1omsh1higlOJWtHScw2pgRiVuOE8CUS9MWldWbv74a',
+      role: 'user',
+      company_id: 1,
+      cpf_cnpj: null,
+      avatar: null,
+      createdAt: 2026-01-14T22:26:36.147Z,
+      updatedAt: 2026-01-14T22:26:36.385Z,
+      deletedAt: null
+    }
+
+      at ProfileController.log [as update] (controllers/user/ProfileController.js:49:21)
+
+[0mPOST /app/profile [36m302[0m 34.365 ms - 34[0m
+[0mPOST /login [32m200[0m 4.279 ms - 3481[0m
+[0mPOST /login [32m200[0m 2.844 ms - 3481[0m
+node.exe : FAIL tests/integration/profile.test.js
+No linha:1 caractere:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL tests/integration/profile.tes 
+   t.js:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Profile Integration
+    ??? GET /app/profile should render profile page (133 ms)
+    ??? POST /app/profile should update user details (129 ms)
+    ?? POST /app/profile should update avatar if provided (10 ms)
+    ?? POST /app/profile should fail with empty name (6 ms)
+
+  ??? Profile Integration ??? POST /app/profile should update avatar if provided
+
+    expected 302 "Found", got 200 "OK"
+
+    [0m [90m 37 |[39m             [33m.[39mpost([32m'/login'[39m)
+     [90m 38 |[39m             [33m.[39msend({ email[33m:[39m 
+[32m'profile@test.com'[39m[33m,[39m password[33m:[39m [32m'pass123'[39m 
+})
+    [31m[1m>[22m[39m[90m 39 |[39m             
+[33m.[39mexpect([35m302[39m)[33m;[39m
+     [90m    |[39m              [31m[1m^[22m[39m
+     [90m 40 |[39m         [36mreturn[39m agent[33m;[39m
+     [90m 41 |[39m     }
+     [90m 42 |[39m[0m
+
+      at expect (tests/integration/profile.test.js:39:14)
+      at Object.getAuthAgent (tests/integration/profile.test.js:66:29)
+      ----
+      at Test._assertStatus (node_modules/supertest/lib/test.js:309:14)
+      at node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (node_modules/supertest/lib/test.js:195:23)
+      at localAssert (node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (node_modules/supertest/lib/test.js:152:11)
+
+  ??? Profile Integration ??? POST /app/profile should fail with empty name
+
+    expected 302 "Found", got 200 "OK"
+
+    [0m [90m 37 |[39m             [33m.[39mpost([32m'/login'[39m)
+     [90m 38 |[39m             [33m.[39msend({ email[33m:[39m 
+[32m'profile@test.com'[39m[33m,[39m password[33m:[39m [32m'pass123'[39m 
+})
+    [31m[1m>[22m[39m[90m 39 |[39m             
+[33m.[39mexpect([35m302[39m)[33m;[39m
+     [90m    |[39m              [31m[1m^[22m[39m
+     [90m 40 |[39m         [36mreturn[39m agent[33m;[39m
+     [90m 41 |[39m     }
+     [90m 42 |[39m[0m
+
+      at expect (tests/integration/profile.test.js:39:14)
+      at Object.getAuthAgent (tests/integration/profile.test.js:88:29)
+      ----
+      at Test._assertStatus (node_modules/supertest/lib/test.js:309:14)
+      at node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (node_modules/supertest/lib/test.js:195:23)
+      at localAssert (node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (node_modules/supertest/lib/test.js:152:11)
+
+-----------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------
+File                         | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                                       
+-----------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------
+All files                    |   36.46 |    15.38 |   30.58 |    37.2 |                                                                                                                         
+ VendaMais                   |   82.22 |    35.71 |   33.33 |   82.22 |                                                                                                                         
+  app.js                     |   82.22 |    35.71 |   33.33 |   82.22 | 60-61,77,82-95                                                                                                          
+ VendaMais/controllers/admin |    12.5 |        0 |       0 |    12.5 |                                                                                                                         
+  AdminController.js         |      25 |      100 |       0 |      25 | 3-13                                                                                                                    
+  CompanyController.js       |      10 |        0 |       0 |      10 | 6-37                                                                                                                    
+ VendaMais/controllers/site  |   28.94 |       50 |    12.5 |   29.72 |                                                                                                                         
+  AuthController.js          |   29.41 |       50 |   14.28 |    30.3 | 7,36-93                                                                                                                 
+  SiteController.js          |      25 |      100 |       0 |      25 | 3-14                                                                                                                    
+ VendaMais/controllers/user  |   14.83 |     4.21 |   13.63 |   15.55 |                                                                                                                         
+  CategoryController.js      |    6.25 |        0 |       0 |    6.66 | 5-61                                                                                                                    
+  DashboardController.js     |   18.18 |        0 |       0 |   18.18 | 5-49                                                                                                                    
+  ProductController.js       |       3 |        0 |       0 |    3.22 | 7-250                                                                                                                   
+  ProfileController.js       |   72.72 |       40 |     100 |   72.72 | 14,24-25,37-43,65                                                                                                       
+  StockController.js         |    7.14 |        0 |       0 |    7.14 | 6-64                                                                                                                    
+  SupplierController.js      |    6.25 |        0 |       0 |    6.66 | 5-62                                                                                                                    
+ VendaMais/middleware        |      28 |       25 |      50 |      28 |                                                                                                                         
+  auth.js                    |   45.45 |     62.5 |     100 |   45.45 | 8-10,16-18                                                                                                              
+  license.js                 |   14.28 |        0 |       0 |   14.28 | 4-29                                                                                                                    
+ VendaMais/models            |   98.48 |       70 |     100 |   98.48 |                                                                                                                         
+  Category.js                |     100 |      100 |     100 |     100 |                                                                                                                         
+  Company.js                 |     100 |      100 |     100 |     100 |                                                                                                                         
+  Product.js                 |     100 |      100 |     100 |     100 |                                                                                                                         
+  StockMovement.js           |     100 |      100 |     100 |     100 |                                                                                                                         
+  Supplier.js                |     100 |      100 |     100 |     100 |                                                                                                                         
+  User.js                    |     100 |      100 |     100 |     100 |                                                                                                                         
+  index.js                   |   95.23 |       70 |     100 |   95.23 | 14                                                                                                                      
+  stocklot.js                |     100 |      100 |     100 |     100 |                                                                                                                         
+ VendaMais/routes            |   36.62 |        0 |   10.34 |   36.62 |                                                                                                                         
+  admin.js                   |   38.46 |      100 |       0 |   38.46 | 9-17,23-31,37-41,47-51                                                                                                  
+  index.js                   |   43.24 |      100 |   16.66 |   43.24 | 8-15,21-25,44-48,53-58,67-71                                                                                            
+  users.js                   |   33.94 |        0 |   10.52 |   33.94 | 17-21,28-36,42-50,56-60,65-69,75-79,85-89,95-99,104-108,114-117,123-127,133-141,147-155,160-170,176-184,189-199,212,220 
+-----------------------------|---------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 2 passed, 4 total
+Snapshots:   0 total
+Time:        1.443 s, estimated 2 s
+Ran all test suites matching tests/integration/profile.test.js.

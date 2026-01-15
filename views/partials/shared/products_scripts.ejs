@@ -1,17 +1,32 @@
 <script>
-    // --- Global State ---
-    let selectedAdjustType = 'price';
-    let searchTimeout;
-
-    // --- Basic Modal Controls ---
+    // --- Basic Modal & Dropdown Controls ---
     function toggleModal(id) {
         document.getElementById(id).classList.toggle('hidden');
     }
 
+    function toggleDropdown(event, id) {
+        event.stopPropagation();
+        
+        // Fechar outros dropdowns abertos
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu.id !== id) menu.classList.add('hidden');
+        });
+
+        const menu = document.getElementById(id);
+        menu.classList.toggle('hidden');
+    }
+
+    // Fechar dropdowns ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.dropdown-menu')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+        }
+    });
+
     // --- Row & Selection Logic ---
     function handleRowClick(event, id) {
-        // Ignorar se clicar em algo interativo (checkbox, botão, dropdown)
-        if (event.target.closest('button, input, a, .dropdown')) return;
+        // Ignorar se clicar em algo interativo
+        if (event.target.closest('button, input, a, select, .dropdown-menu, svg, path')) return;
         prepareEditModal(id);
     }
 
@@ -264,6 +279,15 @@
         if (form.supplier_id) form.supplier_id.value = dataDiv.dataset.supplierId || '';
 
         toggleModal('productModal');
+    }
+
+    function prepareMoveModal(productId) {
+        const modal = document.getElementById('moveModal');
+        const select = modal.querySelector('select[name="product_id"]');
+        if (select) {
+            select.value = productId;
+        }
+        toggleModal('moveModal');
     }
 
     function resetProductModal() {

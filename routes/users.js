@@ -215,8 +215,7 @@ router.get('/profile', auth, async function(req, res, next) {
 
 router.post('/profile', auth, upload.single('avatar'), async function(req, res, next) {
   try {
-    const result = await ProfileController.update(req, res);
-    res.redirect('/app/profile');
+    await ProfileController.update(req, res, next);
   } catch (err) {
     next(err);
   }

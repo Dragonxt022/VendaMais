@@ -11,7 +11,7 @@
     "tailwind:watch": "tailwindcss -i ./public/stylesheets/input.css -o ./public/stylesheets/style.css --watch",
     "backup": "git add . && node -e \"const d=new Date(); const s=d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0')+'-'+d.getSeconds().toString().padStart(2,'0'); require('child_process').execSync('git commit -m \\\"backup ' + s + '\\\"', {stdio: 'inherit'})\"",
     "reset": "git reset --soft HEAD~1",
-    "test": "jest",
+    "test": "jest --runInBand",
     "db:seed": "node seeders/product_seeder.js"
   },
   "dependencies": {
