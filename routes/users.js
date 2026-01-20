@@ -11,6 +11,15 @@ const license = require('../middleware/license');
 const multer = require('multer');
 const path = require('path');
 
+// Importar validações
+const {
+  routes: {
+    product: productValidations,
+    stock: stockValidations,
+    entity: entityValidations
+  }
+} = require('../utils');
+
 // Configure Multer for avatars
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -52,7 +61,7 @@ router.get('/products', auth, license, async function(req, res, next) {
 });
 
 /* POST create product. */
-router.post('/products', auth, async function(req, res, next) {
+router.post('/products', auth, ...productValidations.create, async function(req, res, next) {
   try {
     await ProductController.createProduct(req, res);
     res.redirect('/app/products');
@@ -61,7 +70,7 @@ router.post('/products', auth, async function(req, res, next) {
   }
 });
 
-router.post('/products/:id/update', auth, async function(req, res, next) {
+router.post('/products/:id/update', auth, ...productValidations.update, async function(req, res, next) {
   try {
     await ProductController.updateProduct(req, res);
     res.redirect('/app/products');
@@ -71,7 +80,7 @@ router.post('/products/:id/update', auth, async function(req, res, next) {
 });
 
 /* POST toggle favorite. */
-router.post('/products/:id/favorite', auth, async function(req, res, next) {
+router.post('/products/:id/favorite', auth, ...productValidations.toggleFavorite, async function(req, res, next) {
   try {
     const result = await ProductController.toggleFavorite(req, res);
     res.json(result);
@@ -81,7 +90,7 @@ router.post('/products/:id/favorite', auth, async function(req, res, next) {
 });
 
 /* POST duplicate product. */
-router.post('/products/:id/duplicate', auth, async function(req, res, next) {
+router.post('/products/:id/duplicate', auth, ...productValidations.duplicate, async function(req, res, next) {
   try {
     const result = await ProductController.duplicateProduct(req, res);
     res.json(result);
@@ -91,7 +100,7 @@ router.post('/products/:id/duplicate', auth, async function(req, res, next) {
 });
 
 /* POST bulk actions. */
-router.post('/products/bulk-delete', auth, async function(req, res, next) {
+router.post('/products/bulk-delete', auth, ...productValidations.bulkDelete, async function(req, res, next) {
   try {
     const result = await ProductController.bulkDelete(req, res);
     res.json(result);
@@ -100,7 +109,7 @@ router.post('/products/bulk-delete', auth, async function(req, res, next) {
   }
 });
 
-router.post('/products/bulk-adjust', auth, async function(req, res, next) {
+router.post('/products/bulk-adjust', auth, ...productValidations.bulkAdjust, async function(req, res, next) {
   try {
     const result = await ProductController.bulkAdjust(req, res);
     res.json(result);
@@ -110,7 +119,7 @@ router.post('/products/bulk-adjust', auth, async function(req, res, next) {
 });
 
 /* GET search products (predictive). */
-router.get('/products/search', auth, async function(req, res, next) {
+router.get('/products/search', auth, ...productValidations.search, async function(req, res, next) {
   try {
     await ProductController.search(req, res);
   } catch (err) {
@@ -119,7 +128,7 @@ router.get('/products/search', auth, async function(req, res, next) {
 });
 
 /* POST record stock movement. */
-router.post('/stock/move', auth, license, async function(req, res, next) {
+router.post('/stock/move', auth, license, ...stockValidations.recordMovement, async function(req, res, next) {
   try {
     await StockController.recordMovement(req, res);
     res.redirect('/app/products'); // Redirect back to products list
@@ -129,7 +138,7 @@ router.post('/stock/move', auth, license, async function(req, res, next) {
 });
 
 /* GET product history. */
-router.get('/products/:product_id/history', auth, license, async function(req, res, next) {
+router.get('/products/:product_id/history', auth, license, ...stockValidations.history, async function(req, res, next) {
   try {
     const data = await StockController.history(req, res);
     res.render('user/products/history', {
@@ -156,7 +165,7 @@ router.get('/categories', auth, license, async function(req, res, next) {
   }
 });
 
-router.post('/categories', auth, async function(req, res, next) {
+router.post('/categories', auth, ...entityValidations.category, async function(req, res, next) {
   try {
     const result = await CategoryController.store(req, res);
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {
@@ -185,7 +194,7 @@ router.get('/suppliers', auth, license, async function(req, res, next) {
   }
 });
 
-router.post('/suppliers', auth, async function(req, res, next) {
+router.post('/suppliers', auth, ...entityValidations.supplier, async function(req, res, next) {
   try {
     const result = await SupplierController.store(req, res);
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {

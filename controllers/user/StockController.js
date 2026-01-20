@@ -7,17 +7,29 @@ module.exports = {
       const { product_id } = req.params;
       const { company_id } = req.user;
 
+      // Verificar se o produto existe e pertence à empresa
+      const product = await Product.findOne({
+        where: { id: product_id, company_id }
+      });
+
+      if (!product) {
+        throw new Error('Produto não encontrado');
+      }
+
       const movements = await StockMovement.findAll({
         where: { product_id },
         include: [{
           model: Product,
-          where: { company_id } // Ensure isolation
+          where: { company_id }, // Ensure isolation
+          attributes: ['id', 'name', 'manage_stock']
         }],
-        order: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']],
+        limit: 100 // Limitar para evitar sobrecarga
       });
 
-      return { movements };
+      return { movements, product };
     } catch (err) {
+      console.error('Error in stock history:', err);
       throw err;
     }
   },
@@ -29,6 +41,7 @@ module.exports = {
       const { product_id, type, quantity, reason } = req.body;
       const { company_id, id: user_id } = req.user;
 
+      // Buscar produto e verificar se pertence à empresa
       const product = await Product.findOne({
         where: { id: product_id, company_id }
       });
@@ -37,30 +50,72 @@ module.exports = {
         throw new Error('Produto não encontrado');
       }
 
+      // Verificar se o produto gerencia estoque
+      if (!product.manage_stock) {
+        throw new Error('Este produto não possui gerenciamento de estoque habilitado');
+      }
+
+      // Validações específicas por tipo de movimento
+      const qty = parseInt(quantity);
+      if (isNaN(qty) || qty < 0) {
+        throw new Error('Quantidade deve ser um número inteiro não negativo');
+      }
+
+      // Verificar estoque suficiente para saídas
+      if (type === 'out' && product.stock_quantity < qty) {
+        throw new Error(`Estoque insuficiente. Disponível: ${product.stock_quantity}, Solicitado: ${qty}`);
+      }
+
+      // Criar movimentação
       const movement = await StockMovement.create({
         product_id,
         type,
-        quantity,
-        reason,
+        quantity: qty,
+        reason: reason || null,
         user_id
       }, { transaction: t });
 
-      // Update actual product stock
+      // Atualizar estoque do produto
+      let newStock = product.stock_quantity;
       if (type === 'in') {
-        product.stock_quantity += parseInt(quantity);
+        newStock += qty;
       } else if (type === 'out') {
-        product.stock_quantity -= parseInt(quantity);
+        newStock -= qty;
       } else if (type === 'adjustment') {
-        product.stock_quantity = parseInt(quantity);
+        newStock = qty;
       }
 
-      await product.save({ transaction: t });
+      // Garantir que estoque não seja negativo
+      if (newStock < 0) {
+        throw new Error('Operação resultaria em estoque negativo');
+      }
+
+      await product.update({ stock_quantity: newStock }, { transaction: t });
       await t.commit();
 
-      return { movement, product };
+      // Adicionar notificação de sucesso
+      if (req.session) {
+        req.session.notification = {
+          type: 'success',
+          title: 'Estoque Atualizado',
+          message: `Movimentação registrada com sucesso. Novo estoque: ${newStock}`
+        };
+      }
+
+      return { movement, product: { ...product.toJSON(), stock_quantity: newStock } };
     } catch (err) {
       console.error('Error in recordMovement:', err);
       await t.rollback();
+      
+      // Adicionar notificação de erro
+      if (req.session) {
+        req.session.notification = {
+          type: 'error',
+          title: 'Erro na Movimentação',
+          message: err.message
+        };
+      }
+      
       throw err;
     }
   }

@@ -193,7 +193,7 @@ module.exports = {
     }
   },
 
-  // Bulk adjust products
+// Bulk adjust products
   async bulkAdjust(req, res) {
     try {
       const { company_id } = req.user;
@@ -203,23 +203,62 @@ module.exports = {
 
       const products = await Product.findAll({ where: { id: ids, company_id } });
       const val = parseFloat(value);
+      
+      let updatedProducts = [];
+      let skippedProducts = [];
 
       for (const product of products) {
         let updateData = {};
+        let shouldUpdate = false;
+        
         if (type === 'price') {
           let newPrice = mode === 'fixed' ? val : product.price * (1 + val / 100);
           updateData.price = Math.max(0, newPrice);
+          shouldUpdate = true;
         } else if (type === 'cost') {
           let newCost = mode === 'fixed' ? val : product.cost * (1 + val / 100);
           updateData.cost = Math.max(0, newCost);
+          shouldUpdate = true;
         } else if (type === 'stock') {
-          let newStock = mode === 'fixed' ? val : product.stock_quantity + val;
-          updateData.stock_quantity = Math.max(0, newStock);
+          // 🔥 CORREÇÃO DO BUG: Só atualiza estoque se o produto for gerenciável
+          if (product.manage_stock) {
+            let newStock = mode === 'fixed' ? val : product.stock_quantity + val;
+            updateData.stock_quantity = Math.max(0, newStock);
+            shouldUpdate = true;
+          } else {
+            // Produto não gerenciável - não atualiza estoque
+            skippedProducts.push({
+              id: product.id,
+              name: product.name,
+              reason: 'Produto não possui gerenciamento de estoque habilitado'
+            });
+            continue;
+          }
         }
-        await product.update(updateData);
+        
+        if (shouldUpdate) {
+          await product.update(updateData);
+          updatedProducts.push({
+            id: product.id,
+            name: product.name,
+            updated: updateData
+          });
+        }
       }
 
-      return { success: true };
+      const result = { 
+        success: true,
+        updated: updatedProducts.length,
+        skipped: skippedProducts.length
+      };
+
+      // Adicionar informações sobre produtos pulados se houver
+      if (skippedProducts.length > 0) {
+        result.warning = `${skippedProducts.length} produtos não foram atualizados por não possuírem gerenciamento de estoque`;
+        result.skippedProducts = skippedProducts;
+      }
+
+      return result;
     } catch (err) {
       throw err;
     }
