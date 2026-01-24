@@ -43,7 +43,7 @@ Esta é a forma mais simples e rápida de rodar a aplicação em qualquer ambien
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/SEU-USUARIO/vendamais.git
+git clone https://github.com/Dragonxt022/vendamais.git
 cd vendamais
 
 # 2. Configure as variáveis de ambiente
@@ -94,7 +94,7 @@ docker-compose up -d --build
 
 ```powershell
 # 1. Clone o repositório
-git clone https://github.com/SEU-USUARIO/vendamais.git
+git clone https://github.com/Dragonxt022/vendamais.git
 cd vendamais
 
 # 2. Instale Node.js (se não tiver)
@@ -117,7 +117,7 @@ npm start
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/SEU-USUARIO/vendamais.git
+git clone https://github.com/Dragonxt022/vendamais.git
 cd vendamais
 
 # 2. Instale Node.js (se não tiver)
@@ -419,9 +419,9 @@ Este projeto está licenciado sob a **GPL-3.0**. Veja o arquivo [LICENSE](LICENS
 
 ## 📞 Suporte
 
-- **Issues**: [GitHub Issues](https://github.com/SEU-USUARIO/vendamais/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/SEU-USUARIO/vendamais/discussions)
-- **Email**: suporte@vendamais.com
+- **Issues**: [GitHub Issues](https://github.com/Dragonxt022/vendamais/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Dragonxt022/vendamais/discussions)
+- **Email**: pissinatti2019@gmail.com
 
 ---
 
