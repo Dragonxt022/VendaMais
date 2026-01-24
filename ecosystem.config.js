@@ -1,8 +1,7 @@
 module.exports = {
   apps: [{
     name: 'vendamais',
-    script: 'npm',
-    args: 'start',
+    script: './bin/www',
     instances: 1,
     autorestart: true,
     watch: false,
