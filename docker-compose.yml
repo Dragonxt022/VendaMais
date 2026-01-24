@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mysql
+      - DB_NAME=vendamais
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+      - DB_PORT=3306
+      - DB_DIALECT=mysql
+    depends_on:
+      - mysql
+    networks:
+      - vendamais-network
+    volumes:
+      - ./public/uploads:/app/public/uploads
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=vendamais
+      - MYSQL_USER=vendamais
+      - MYSQL_PASSWORD=vendamais
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - vendamais-network
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=rootpassword
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - vendamais-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+
+networks:
+  vendamais-network:
+    driver: bridge
