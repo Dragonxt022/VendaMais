@@ -23,7 +23,7 @@ describe('Dashboard Integration', () => {
             email: 'dash@test.com',
             password_hash: hashedPassword,
             company_id: company.id,
-            role: 'user'
+            role: 'gerente'
         });
 
         // Create some products

@@ -15,7 +15,9 @@
                 </button>
             </div>
             <%- include('../../partials/ui/button', { text: 'Registrar Movimento', variant: 'secondary', onclick: "toggleModal('moveModal')" }) %>
-            <%- include('../../partials/ui/button', { text: 'Novo Produto', variant: 'primary', onclick: "resetProductModal(); toggleModal('productModal')" }) %>
+            <% if (ability.can('create', 'Product')) { %>
+                <%- include('../../partials/ui/button', { text: 'Novo Produto', variant: 'primary', onclick: "resetProductModal(); toggleModal('productModal')" }) %>
+            <% } %>
         </div>
     </div>
     
@@ -60,8 +62,8 @@
     </div>
 </div>
 
-<div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-    <div class="overflow-x-auto">
+<div class="bg-white rounded-3xl border border-slate-200 shadow-sm">
+    <div class="overflow-x-auto rounded-3xl" style="min-height: 400px;">
         <table class="w-full text-left border-collapse">
             <thead class="bg-slate-50 border-b border-slate-200">
                 <tr>

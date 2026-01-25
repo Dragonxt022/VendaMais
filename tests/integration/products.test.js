@@ -22,7 +22,7 @@ describe('Product Integration', () => {
             email: 'stock@test.com',
             password_hash: hashedPassword,
             company_id: company.id,
-            role: 'user'
+            role: 'gerente'
         });
 
         category = await Category.create({

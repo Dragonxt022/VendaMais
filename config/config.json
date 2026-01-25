@@ -1,20 +1,20 @@
 {
   "development": {
-    "dialect": "sqlite",
-    "storage": "./database.sqlite",
-    "logging": false
-  },
-  "test": {
-    "dialect": "sqlite",
-    "storage": "./database_test.sqlite",
-    "logging": false
-  },
-  "production": {
     "username": "root",
     "password": "rootpassword",
     "database": "vendamais",
-    "host": "mysql",
-    "dialect": "mysql",
-    "port": 3306
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": "rootpassword",
+    "database": "vendamais_test",
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "mysql"
   }
 }

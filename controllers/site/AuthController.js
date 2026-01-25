@@ -74,7 +74,7 @@ module.exports = {
         email,
         password_hash,
         company_id: company.id,
-        role: 'user'
+        role: 'gerente'
       }, { transaction: t });
 
       await t.commit();

@@ -15,7 +15,7 @@ class ProfileController {
         }
     }
 
-    async update(req, res) {
+    async update(req, res, next) {
         try {
             const { name, email, cpf_cnpj } = req.body;
             const userId = req.session.user.id;

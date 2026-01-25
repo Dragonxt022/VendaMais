@@ -16,6 +16,8 @@ const handleValidationErrors = (req, res, next) => {
       message: error.msg,
       value: error.value
     }));
+
+    console.log(`[VALIDATION ERROR] Path: ${req.originalUrl} | Errors:`, JSON.stringify(formattedErrors, null, 2));
     
     // Verificar se é requisição AJAX ou API
     if (req.xhr || req.headers.accept.indexOf('json') > -1) {

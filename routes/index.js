@@ -30,7 +30,9 @@ router.post('/login', async function(req, res, next) {
   try {
     const { sessionUser, redirectPath } = await AuthController.login(req, res);
     req.session.user = sessionUser;
-    res.redirect(redirectPath);
+    req.session.save(() => {
+      res.redirect(redirectPath);
+    });
   } catch (err) {
     res.render('site/pages/login', { 
       layout: 'site/layouts/site', 

@@ -40,19 +40,18 @@ const createProductValidation = [
     .withMessage('Preço deve ser um número positivo (máximo: 999999.99)'),
   
   body('cost')
-    .notEmpty()
-    .withMessage('Custo é obrigatório')
+    .optional({ checkFalsy: true })
     .isFloat({ min: 0, max: 999999.99 })
     .withMessage('Custo deve ser um número positivo (máximo: 999999.99)')
     .custom((value, { req }) => {
-      if (parseFloat(value) > parseFloat(req.body.price)) {
+      if (value && req.body.price && parseFloat(value) > parseFloat(req.body.price)) {
         throw new Error('Custo não pode ser maior que o preço de venda');
       }
       return true;
     }),
   
   body('initial_stock')
-    .optional()
+    .optional({ checkFalsy: true })
     .isInt({ min: 0, max: 999999 })
     .withMessage('Estoque inicial deve ser um número inteiro não negativo (máximo: 999999)'),
   
@@ -63,7 +62,7 @@ const createProductValidation = [
   
   body('manage_stock')
     .optional()
-    .isBoolean()
+    .custom(value => value === 'on' || value === 'true' || value === true || value === 'false' || value === false)
     .withMessage('Gerenciar estoque deve ser verdadeiro ou falso'),
   
   body('category_id')
@@ -140,7 +139,7 @@ const updateProductValidation = [
   
   body('manage_stock')
     .optional()
-    .isBoolean()
+    .custom(value => value === 'on' || value === 'true' || value === true || value === 'false' || value === false)
     .withMessage('Gerenciar estoque deve ser verdadeiro ou falso'),
   
   body('category_id')

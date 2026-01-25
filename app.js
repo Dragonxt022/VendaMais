@@ -8,6 +8,7 @@ var logger = require('morgan');
 var expressLayouts = require('express-ejs-layouts');
 var session = require('express-session');
 var SequelizeStore = require('connect-session-sequelize')(session.Store);
+
 const { sequelize } = require('./models');
 
 var indexRouter = require('./routes/index');
@@ -26,7 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session configuration
+// Session configuration (temporariamente desabilitado)
 const sessionDuration = (process.env.SESSION_DURATION_HOURS || 8) * 60 * 60 * 1000;
 const sessionStore = new SequelizeStore({
   db: sequelize,
@@ -37,28 +38,48 @@ const sessionStore = new SequelizeStore({
 
 app.use(session({
   key: 'vendamais.sid',
-  secret: process.env.SECRET,
+  secret: 'venda_mais_secret_key_fixed_123', // Chave fixa para depuração
   store: sessionStore,
-  resave: false,
-  saveUninitialized: false,
+  resave: true,                
+  saveUninitialized: true,     
+  proxy: true,                 
   cookie: {
-    maxAge: sessionDuration,
+    path: '/',
+    maxAge: 8 * 60 * 60 * 1000,
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production'
+    secure: false,             
+    sameSite: 'lax'            
   }
 }));
 
-// Sincroniza a tabela de sessões
+// Middleware de Debug de Sessão
+app.use((req, res, next) => {
+  console.log(`[DEBUG SESSION] Path: ${req.path} | ID: ${req.sessionID} | User na Sessão: ${req.session.user ? req.session.user.email : 'Vazio'}`);
+  next();
+});
+
+// Sincroniza a tabela de sessões (em produção, use migrations)
 sessionStore.sync();
 
+const { defineAbilitiesFor } = require('./utils/ability');
 // Disponibiliza o usuário para todas as views
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
+  const user = (req.session && req.session.user) ? req.session.user : null;
+  res.locals.user = user;
+  
+  try {
+    req.ability = defineAbilitiesFor(user);
+    res.locals.ability = req.ability;
+  } catch (err) {
+    console.error('Erro ao definir permissões CASL:', err);
+    req.ability = defineAbilitiesFor(null);
+    res.locals.ability = req.ability;
+  }
   
   // Handle notifications (toast)
-  if (req.session.notification) {
+  if (req.session && req.session.notification) {
     res.locals.notification = req.session.notification;
-    delete req.session.notification; // Clear after use
+    delete req.session.notification; 
   } else {
     res.locals.notification = null;
   }

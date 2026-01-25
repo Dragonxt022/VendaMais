@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">55.45% </span>
+                <span class="strong">48.18% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>61/110</span>
+                <span class='fraction'>53/110</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">57.89% </span>
+                <span class="strong">36.84% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>11/19</span>
+                <span class='fraction'>7/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">55.45% </span>
+                <span class="strong">48.18% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>61/110</span>
+                <span class='fraction'>53/110</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -321,11 +321,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
@@ -509,9 +509,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -521,8 +521,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -553,12 +553,12 @@ const {
 &nbsp;
 // Configure Multer for avatars
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/avatars');
+  destination: <span class="fstat-no" title="function not covered" >fu</span>nction (req, file, cb) {
+<span class="cstat-no" title="statement not covered" >    cb(null, 'public/uploads/avatars');</span>
   },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));
+  filename: <span class="fstat-no" title="function not covered" >fu</span>nction (req, file, cb) {
+    const uniqueSuffix = <span class="cstat-no" title="statement not covered" >Date.now() + '-' + Math.round(Math.random() * 1E9);</span>
+<span class="cstat-no" title="statement not covered" >    cb(null, 'avatar-' + uniqueSuffix + path.extname(file.originalname));</span>
   }
 });
 const upload = multer({ storage: storage });
@@ -741,10 +741,10 @@ router.post('/suppliers', auth, ...entityValidations.supplier, <span class="fsta
 });
 &nbsp;
 /* Profile Routes */
-router.get('/profile', auth, async function(req, res, next) {
-  try {
-    const data = await ProfileController.index(req, res);
-    res.render('user/profile', {
+router.get('/profile', auth, <span class="fstat-no" title="function not covered" >as</span>ync function(req, res, next) {
+<span class="cstat-no" title="statement not covered" >  try {</span>
+    const data = <span class="cstat-no" title="statement not covered" >await ProfileController.index(req, res);</span>
+<span class="cstat-no" title="statement not covered" >    res.render('user/profile', {</span>
       layout: 'user/layouts/user',
       ...data
     });
@@ -753,9 +753,9 @@ router.get('/profile', auth, async function(req, res, next) {
   }
 });
 &nbsp;
-router.post('/profile', auth, upload.single('avatar'), async function(req, res, next) {
-  try {
-    await ProfileController.update(req, res, next);
+router.post('/profile', auth, upload.single('avatar'), <span class="fstat-no" title="function not covered" >as</span>ync function(req, res, next) {
+<span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >    await ProfileController.update(req, res, next);</span>
   } catch (err) {
 <span class="cstat-no" title="statement not covered" >    next(err);</span>
   }
@@ -769,7 +769,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-20T01:41:42.570Z
+                at 2026-01-24T19:39:13.865Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

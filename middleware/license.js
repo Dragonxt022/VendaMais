@@ -2,7 +2,7 @@ const { Company } = require('../models');
 
 module.exports = async (req, res, next) => {
   try {
-    if (!req.user || !req.user.company_id) {
+    if (!req.user || !req.user.company_id || req.user.role === 'admin') {
       return next();
     }
 

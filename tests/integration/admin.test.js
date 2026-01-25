@@ -52,7 +52,7 @@ describe('Admin Integration', () => {
             email: 'regular@test.com',
             password_hash: hashedPassword,
             company_id: company.id,
-            role: 'user'
+            role: 'gerente'
         });
 
         const agent = request.agent(app);
