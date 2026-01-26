@@ -80,29 +80,23 @@ module.exports = {
   // Create a new product
   async createProduct(req, res) {
     try {
-      const uploadMiddleware = createUploadMiddleware({
-        destination: 'public/uploads',
-        subDirectory: 'products',
-        fieldName: 'image'
-      });
-
-      // Execute upload middleware
-      await new Promise((resolve, reject) => {
-        uploadMiddleware(req, res, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-
+      console.log('[CREATE PRODUCT] Iniciando criação de produto');
+      console.log('[CREATE PRODUCT] req.body:', req.body);
+      console.log('[CREATE PRODUCT] req.file:', req.file ? 'Arquivo presente' : 'Sem arquivo');
+      
       const { company_id } = req.user;
       const { name, sku, ean, description, price, cost, min_stock, initial_stock, category_id, supplier_id, manage_stock } = req.body;
+      
+      console.log('[CREATE PRODUCT] Dados extraídos:', { name, sku, price, cost, initial_stock, min_stock });
       
       let imageUrl = null;
       if (req.file) {
         const imageData = imageService.processUploadedImage(req.file, 'products');
         imageUrl = imageData.relativePath;
+        console.log('[CREATE PRODUCT] Imagem processada:', imageUrl);
       }
       
+      console.log('[CREATE PRODUCT] Criando produto no banco...');
       const product = await Product.create({
         company_id,
         name,
@@ -118,8 +112,10 @@ module.exports = {
         image_url: imageUrl
       });
       
+      console.log('[CREATE PRODUCT] Produto criado com sucesso:', product.id);
       return { product };
     } catch (err) {
+      console.error('[CREATE PRODUCT] ERRO:', err);
       throw err;
     }
   },
@@ -127,20 +123,6 @@ module.exports = {
   // Update a product
   async updateProduct(req, res) {
     try {
-      const uploadMiddleware = createUploadMiddleware({
-        destination: 'public/uploads',
-        subDirectory: 'products',
-        fieldName: 'image'
-      });
-
-      // Execute upload middleware
-      await new Promise((resolve, reject) => {
-        uploadMiddleware(req, res, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-
       const { company_id } = req.user;
       const { id } = req.params;
       const { name, sku, ean, description, price, cost, min_stock, category_id, supplier_id, manage_stock, removeImage } = req.body;

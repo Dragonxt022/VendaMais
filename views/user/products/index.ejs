@@ -24,7 +24,7 @@
     <!-- Controls Bar -->
     <div class="mt-8 flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
         <div class="relative flex-1 min-w-[300px]">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><img src="/uploads/icon/search.svg" alt="Pesquisar" class="w-6 h-6"></span>
             <input 
                 type="text" 
                 id="productSearch" 
@@ -99,10 +99,11 @@
                             <td class="px-4 py-4 flex items-center">
                                <button onclick="toggleFavorite('<%= product.id %>')" class="mr-2 text-xl transition-transform hover:scale-125 focus:outline-none">
                                     <span id="fav-icon-<%= product.id %>" class="<%= product.is_favorite ? 'text-red-500' : 'text-slate-300 grayscale opacity-40 hover:opacity-100 hover:grayscale-0' %>">
-                                        <%- product.is_favorite ? 
-                                            '<img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">' : 
-                                            '<img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">' 
-                                        %>
+                                        <% if (product.is_favorite) { %>
+                                            <img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">
+                                        <% } else { %>
+                                            <img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">
+                                        <% } %>
                                     </span>
                                 </button>
                                 <span class="font-medium text-slate-900 block"><%= product.name %></span>
@@ -134,13 +135,15 @@
                                 <% } %>
                             </td>
                             <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
-                                <!-- Hidden data for edit modal -->
+                                <!-- Consolidated data for edit modal and other JS actions -->
                                 <div id="product-data-<%= product.id %>" 
+                                     data-id="<%= product.id %>"
                                      data-name="<%= product.name %>" 
                                      data-sku="<%= product.sku || '' %>" 
                                      data-price="<%= product.price %>" 
                                      data-cost="<%= product.cost %>" 
                                      data-min-stock="<%= product.min_stock %>" 
+                                     data-current-stock="<%= product.stock_quantity || 0 %>"
                                      data-manage-stock="<%= product.manage_stock %>" 
                                      data-category-id="<%= product.category_id || '' %>" 
                                      data-supplier-id="<%= product.supplier_id || '' %>"
@@ -175,9 +178,15 @@
                                             <span><img src="/uploads/icon/historico.svg" alt="Histórico" class="w-6 h-6"></span> Histórico de Estoque
                                         </a>
                                         <button onclick="toggleFavorite('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span id="fav-btn-icon-<%= product.id %>"><%- product.is_favorite ? '<img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">' : '<img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">' %></span> 
+                                            <span id="fav-btn-icon-<%= product.id %>">
+                                                <% if (product.is_favorite) { %>
+                                                    <img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">
+                                                <% } else { %>
+                                                    <img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">
+                                                <% } %>
+                                            </span> 
                                             <span id="fav-btn-text-<%= product.id %>">
-                                                <%- product.is_favorite ? 'Remover Favorito' : 'Favoritar' %>
+                                                <%= product.is_favorite ? 'Remover Favorito' : 'Favoritar' %>
                                             </span>
                                         </button>
                                         <div class="border-t border-slate-100 mt-1 pt-1">
@@ -188,18 +197,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Hidden data for edit modal -->
-                                <div id="product-data-<%= product.id %>" class="hidden" 
-                                    data-id="<%= product.id %>"
-                                    data-name="<%= product.name %>"
-                                    data-sku="<%= product.sku %>"
-                                    data-price="<%= product.price %>"
-                                    data-cost="<%= product.cost %>"
-                                    data-min-stock="<%= product.min_stock %>"
-                                    data-manage-stock="<%= product.manage_stock %>"
-                                    data-category-id="<%= product.category_id %>"
-                                    data-supplier-id="<%= product.supplier_id %>">
-                                </div>
                             </td>
                         </tr>
                     <% }); %>
@@ -207,7 +204,7 @@
                     <tr>
                         <td colspan="8" class="px-6 py-20 text-center">
                             <div class="flex flex-col items-center">
-                                <span class="text-4xl mb-4">📦</span>
+                                <span class="text-4xl mb-4"><img src="/uploads/icon/box-produtos.svg" alt="Nenhum produto encontrado" class="w-16 h-16"></span>
                                 <h3 class="text-slate-900 font-semibold">Nenhum produto encontrado</h3>
                                 <p class="text-slate-400 text-sm">Tente ajustar seus filtros ou busca.</p>
                             </div>

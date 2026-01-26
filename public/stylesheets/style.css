@@ -1111,6 +1111,10 @@ body {
   align-items: flex-start;
 }
 
+.items-end {
+  align-items: flex-end;
+}
+
 .items-center {
   align-items: center;
 }
@@ -1332,6 +1336,11 @@ body {
   border-color: rgb(254 202 202 / var(--tw-border-opacity, 1));
 }
 
+.border-red-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(239 68 68 / var(--tw-border-opacity, 1));
+}
+
 .border-rose-100 {
   --tw-border-opacity: 1;
   border-color: rgb(255 228 230 / var(--tw-border-opacity, 1));
@@ -1391,9 +1400,8 @@ body {
   background-color: rgb(255 251 235 / 0.9);
 }
 
-.bg-black {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
+.bg-black\/50 {
+  background-color: rgb(0 0 0 / 0.5);
 }
 
 .bg-blue-100 {
@@ -1537,10 +1545,6 @@ body {
   background-color: rgb(255 255 255 / 0.8);
 }
 
-.bg-opacity-50 {
-  --tw-bg-opacity: 0.5;
-}
-
 .bg-\[radial-gradient\(circle_at_30\%_20\%\2c \#ffedd5_0\%\2c transparent_50\%\)\2c radial-gradient\(circle_at_70\%_80\%\2c \#fffff_0\%\2c transparent_50\%\)\] {
   background-image: radial-gradient(circle at 30% 20%,#ffedd5 0%,transparent 50%),radial-gradient(circle at 70% 80%,#fffff 0%,transparent 50%);
 }
@@ -1575,6 +1579,10 @@ body {
 .object-cover {
   -o-object-fit: cover;
      object-fit: cover;
+}
+
+.p-0 {
+  padding: 0px;
 }
 
 .p-1 {
@@ -1849,6 +1857,10 @@ body {
   font-style: italic;
 }
 
+.leading-none {
+  line-height: 1;
+}
+
 .leading-relaxed {
   line-height: 1.625;
 }
@@ -2065,6 +2077,11 @@ body {
 .outline-none {
   outline: 2px solid transparent;
   outline-offset: 2px;
+}
+
+.ring-red-500 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(239 68 68 / var(--tw-ring-opacity, 1));
 }
 
 .blur {
@@ -2307,6 +2324,11 @@ body {
   border-color: rgb(249 115 22 / var(--tw-border-opacity, 1));
 }
 
+.focus\:border-red-500:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(239 68 68 / var(--tw-border-opacity, 1));
+}
+
 .focus\:outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -2339,6 +2361,10 @@ body {
 
 .focus\:ring-orange-500\/10:focus {
   --tw-ring-color: rgb(249 115 22 / 0.1);
+}
+
+.focus\:ring-red-500\/10:focus {
+  --tw-ring-color: rgb(239 68 68 / 0.1);
 }
 
 .active\:scale-95:active {
@@ -2379,6 +2405,10 @@ body {
 .group:hover .group-hover\:text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
 }
 
 .peer:checked ~ .peer-checked\:translate-x-6 {

@@ -1,4 +1,4 @@
-class ImageUpload {
+window.ImageUpload = class ImageUpload {
   constructor(containerSelector, options = {}) {
     this.container = document.querySelector(containerSelector);
     this.options = {
@@ -8,6 +8,9 @@ class ImageUpload {
       fallbackImage: '/images/placeholders/product-placeholder.svg',
       ...options
     };
+    if (this.container && this.container.imageUpload) {
+      return this.container.imageUpload;
+    }
     
     this.fileInput = null;
     this.previewImage = null;
@@ -32,19 +35,22 @@ class ImageUpload {
     this.createPreviewImage();
     this.createFileInput();
     
-    this.container.addEventListener('click', () => this.fileInput.click());
+    // Suporte para arrastar e soltar continua no container
     this.container.addEventListener('dragover', this.handleDragOver.bind(this));
     this.container.addEventListener('dragleave', this.handleDragLeave.bind(this));
     this.container.addEventListener('drop', this.handleDrop.bind(this));
     
     this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+    
+    // Add click listener to container to trigger file input
+    this.container.addEventListener('click', () => this.fileInput.click());
   }
   
   createUploadOverlay() {
     this.uploadOverlay = document.createElement('div');
     this.uploadOverlay.className = `
       absolute inset-0 flex flex-col items-center justify-center
-      bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-200
+      bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200
       pointer-events-none z-10
     `;
     
@@ -77,7 +83,7 @@ class ImageUpload {
     this.fileInput.type = 'file';
     this.fileInput.name = 'image';
     this.fileInput.accept = this.options.allowedTypes.join(',');
-    this.fileInput.className = 'hidden';
+    this.fileInput.className = 'hidden'; // Label handles the click automatically
     this.container.appendChild(this.fileInput);
   }
   
@@ -181,12 +187,16 @@ class ImageUpload {
   }
 }
 
-// Inicialização automática para elementos com data-image-upload
-document.addEventListener('DOMContentLoaded', () => {
+// Função para inicializar elementos automaticamente
+function initializeAllImageUploads() {
   const uploadElements = document.querySelectorAll('[data-image-upload]');
+  console.log(`Encontrados ${uploadElements.length} elementos de upload`);
+  
   uploadElements.forEach(element => {
     const type = element.dataset.imageUpload || 'product';
     const fallback = `/images/placeholders/${type}-placeholder.svg`;
+    
+    console.log(`Inicializando upload automático para: ${element.id}`);
     
     const instance = new ImageUpload(`#${element.id}`, {
       fallbackImage: fallback,
@@ -204,4 +214,16 @@ document.addEventListener('DOMContentLoaded', () => {
         window.imageUploadInstance = instance;
     }
   });
-});
+}
+
+// Inicialização automática para elementos com data-image-upload
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeAllImageUploads);
+} else {
+  // Documento já carregado
+  setTimeout(initializeAllImageUploads, 100);
+}
+
+// Debug: Verificar se a classe está disponível globalmente
+console.log('ImageUpload class available:', typeof window.ImageUpload !== 'undefined');
+console.log('Script imageUpload.js carregado com sucesso!');

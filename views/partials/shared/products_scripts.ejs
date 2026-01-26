@@ -1,7 +1,88 @@
 <script>
-    // --- Basic Modal & Dropdown Controls ---
+    // --- Currency Formatting Utility ---
+    function formatCurrency(value) {
+        if (!value && value !== 0) return '';
+        const number = typeof value === 'string' ? parseFloat(value.replace(',', '.')) : value;
+        return number.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function initCurrencyMasks() {
+        document.querySelectorAll('.input-price').forEach(input => {
+            // Prevenir múltiplos listeners
+            if (input._currencyMasked) return;
+            
+            input.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value === '') {
+                    e.target.value = '';
+                    return;
+                }
+                value = (parseInt(value) / 100).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                e.target.value = value;
+            });
+            input._currencyMasked = true;
+        });
+    }
+
+    // Inicializar máscaras após o carregamento
+    document.addEventListener('DOMContentLoaded', initCurrencyMasks);
+    // Reinicializar quando o modal abrir
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (!mutation.target.classList.contains('hidden')) {
+                    initCurrencyMasks();
+                }
+            }
+        });
+    });
+    const productModal = document.getElementById('productModal');
+    if (productModal) observer.observe(productModal, { attributes: true });
+
+
+// --- Basic Modal & Dropdown Controls ---
     function toggleModal(id) {
-        document.getElementById(id).classList.toggle('hidden');
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        
+        const isHidden = modal.classList.contains('hidden');
+        const isSlideModal = id === 'productModal'; // Modal principal de produtos usa slide
+        
+        if (isHidden) {
+            // Abrir modal
+            modal.classList.remove('hidden');
+            if (isSlideModal) {
+                modal.classList.add('show');
+                // Garantir que as máscaras sejam inicializadas
+                setTimeout(() => {
+                    // Inicializar máscaras de moeda
+                    initCurrencyMasks();
+                }, 100);
+            }
+            // Prevenir scroll no body para modals grandes
+            if (isSlideModal || id === 'bulkAdjustModal') {
+                document.body.style.overflow = 'hidden';
+            }
+        } else {
+            // Fechar modal
+            if (isSlideModal) {
+                modal.classList.remove('show');
+                // Esperar a animação terminar antes de esconder
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            } else {
+                modal.classList.add('hidden');
+            }
+            // Restaurar scroll no body
+            document.body.style.overflow = '';
+        }
     }
 
     function toggleDropdown(event, id) {
@@ -141,20 +222,28 @@
         try {
             const res = await fetch(`/app/products/${id}/favorite`, { method: 'POST' });
             const data = await res.json();
+            
             if (data.success) {
                 // Atualizar ícone na tabela
                 const icon = document.getElementById(`fav-icon-${id}`);
-                icon.innerText = data.is_favorite ? '❤️' : '🤍';
-                icon.classList.toggle('text-red-500', data.is_favorite);
-                icon.classList.toggle('text-slate-300', !data.is_favorite);
-                icon.classList.toggle('grayscale', !data.is_favorite);
-                icon.classList.toggle('opacity-40', !data.is_favorite);
-
-                // Atualizar ícone e texto no dropdown
                 const btnIcon = document.getElementById(`fav-btn-icon-${id}`);
                 const btnText = document.getElementById(`fav-btn-text-${id}`);
-                if (btnIcon) btnIcon.innerText = data.is_favorite ? '💔' : '❤️';
-                if (btnText) btnText.innerText = data.is_favorite ? 'Remover Favorito' : 'Favoritar';
+                
+                const activeHtml = '<img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">';
+                const inactiveHtml = '<img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">';
+                
+                if (icon) {
+                    icon.innerHTML = data.is_favorite ? activeHtml : inactiveHtml;
+                    icon.className = data.is_favorite ? 'text-red-500' : 'text-slate-300 grayscale opacity-40 hover:opacity-100 hover:grayscale-0';
+                }
+                
+                if (btnIcon) {
+                    btnIcon.innerHTML = data.is_favorite ? activeHtml : inactiveHtml;
+                }
+
+                if (btnText) {
+                    btnText.innerText = data.is_favorite ? 'Remover Favorito' : 'Favoritar';
+                }
 
                 window.notify('Favorito atualizado!', 'success');
             }
@@ -270,12 +359,28 @@
         if (imageUpload && window.imageUploadInstance) {
             window.imageUploadInstance.reset();
         }
+        
+        // Limpar erros anteriores
+        clearFormErrors(form);
 
         form.name.value = dataDiv.dataset.name;
         form.sku.value = dataDiv.dataset.sku;
-        form.price.value = dataDiv.dataset.price;
-        form.cost.value = dataDiv.dataset.cost;
+        
+        // Formatar valores de preço para o padrão brasileiro ao editar
+        const price = dataDiv.dataset.price;
+        const cost = dataDiv.dataset.cost;
+        
+        form.price.value = formatCurrency(price);
+        form.cost.value = formatCurrency(cost);
+        
         form.min_stock.value = dataDiv.dataset.minStock;
+
+        
+        // Preencher quantidade atual como quantidade inicial na edição
+        const initialStockInput = form.querySelector('input[name="initial_stock"]');
+        if (initialStockInput) {
+            initialStockInput.value = dataDiv.dataset.currentStock || '0';
+        }
         
         const manageStock = dataDiv.dataset.manageStock === 'true';
         form.manage_stock.checked = manageStock;
@@ -288,12 +393,18 @@
         // Set existing image
         const imageUrl = dataDiv.dataset.imageUrl;
         if (imageUpload && imageUrl) {
-            if (!window.imageUploadInstance) {
-                window.imageUploadInstance = new ImageUpload('#productImageUpload', {
-                    fallbackImage: '/images/placeholders/product-placeholder.svg'
-                });
+            console.log('Configurando imagem existente:', imageUrl);
+            const instance = imageUpload.imageUpload || window.imageUploadInstance;
+            if (instance) {
+                instance.setImage(imageUrl);
+            } else {
+                // Se não houver instância, criar manualmente
+                const previewImg = imageUpload.querySelector('img');
+                if (previewImg) {
+                    previewImg.src = imageUrl;
+                    imageUpload.dataset.imageChanged = 'false';
+                }
             }
-            window.imageUploadInstance.setImage(imageUrl);
         }
 
         toggleModal('productModal');
@@ -316,10 +427,22 @@
         form.manage_stock.checked = true;
         toggleStockFields(form.manage_stock);
         
+        // Limpar erros anteriores
+        clearFormErrors(form);
+        
         // Reset image upload
         const imageUpload = document.getElementById('productImageUpload');
         if (imageUpload && window.imageUploadInstance) {
             window.imageUploadInstance.reset();
+        } else if (imageUpload) {
+            // Reset manual caso a instância não exista
+            imageUpload.innerHTML = '';
+            initializeSimpleImageUpload(imageUpload.id);
+        }
+        
+        // Reinicializar o upload de imagem se necessário
+        if (imageUpload && !imageUpload.imageUpload) {
+            initializeSimpleImageUpload(imageUpload.id);
         }
         
         modal.querySelector('h2').innerText = 'Cadastrar Produto';
@@ -330,6 +453,13 @@
         if (eanInput) {
             eanInput.classList.remove('border-green-500', 'bg-green-50');
         }
+        
+        // Reinicializar o interceptor de formulário
+        setTimeout(() => {
+            interceptFormSubmit();
+            // Reinicializar máscaras de moeda
+            initCurrencyMasks();
+        }, 100);
     }
 
     async function searchGlobalCatalog() {
@@ -434,4 +564,340 @@
             }
         } catch (err) { console.error(err); }
     }
+
+    // Função simples para upload de imagem (solução direta)
+    function initializeSimpleImageUpload(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) {
+            console.log(`Elemento ${elementId} não encontrado`);
+            return;
+        }
+        
+        console.log(`Inicializando upload simples para ${elementId}`);
+        
+        // Limpar o elemento completamente
+        element.innerHTML = '';
+        
+        // Adicionar ao formulário e associar ID ao label
+        const form = element.closest('form');
+        if (form) {
+            // IMPORTANTE: Remover todos os inputs de imagem antigos para evitar duplicatas
+            const oldImageInputs = form.querySelectorAll('input[name="image"]');
+            oldImageInputs.forEach(input => {
+                if (input.id && input.id.startsWith('image_input_')) {
+                    input.remove();
+                }
+            });
+        }
+        
+        // Criar input de arquivo
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'image';
+        fileInput.accept = 'image/jpeg,image/jpg,image/png,image/gif,image/webp';
+        fileInput.style.display = 'none';
+        
+        if (form) {
+            // Gerar ID único para o input
+            const inputId = `image_input_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            fileInput.id = inputId;
+            element.htmlFor = inputId; // Associar label ao input
+            form.appendChild(fileInput);
+        } else {
+            element.appendChild(fileInput);
+        }
+        
+        // Adicionar imagem de preview
+        const previewImg = document.createElement('img');
+        previewImg.className = 'w-full h-full object-cover pointer-events-none';
+        previewImg.src = '/images/placeholders/product-placeholder.svg';
+        previewImg.alt = 'Preview';
+        // Prevenir erros de loading
+        previewImg.onerror = function() {
+            this.src = '/images/placeholders/product-placeholder.svg';
+            console.log('Erro de imagem corrigido com placeholder');
+        };
+        element.appendChild(previewImg);
+        
+        // Adicionar overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10';
+        overlay.innerHTML = `
+            <svg class="w-6 h-6 text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="text-white text-[10px] font-bold uppercase tracking-wider">Alterar</span>
+        `;
+        element.appendChild(overlay);
+        
+        // Remover evento de clique anterior para evitar duplicação
+        element.onclick = null;
+        
+        // Remover event listeners anteriores para evitar duplicação
+        const newElement = element.cloneNode(true);
+        element.parentNode.replaceChild(newElement, element);
+        
+        // IMPORTANTE: Obter referência da imagem do novo elemento
+        const newPreviewImg = newElement.querySelector('img');
+        
+        // Adicionar evento de clique único
+        newElement.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Clique no upload detectado!');
+            console.log('Input file name:', fileInput.name);
+            console.log('Input tem arquivo?', fileInput.files.length > 0);
+            fileInput.click();
+        }, { once: false });
+        
+        // Adicionar evento de change
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            console.log('Arquivo selecionado:', file.name);
+            
+            // Validar arquivo
+            if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
+                alert('Tipo de arquivo inválido. Apenas JPEG, PNG, GIF e WebP são permitidos.');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Arquivo muito grande. O tamanho máximo é 5MB.');
+                return;
+            }
+            
+            // Mostrar preview usando FileReader (data URL)
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                newPreviewImg.src = dataUrl;
+                newElement.dataset.imageChanged = 'true';
+                
+                // Salvar informações do arquivo
+                newElement.dataset.imageFile = JSON.stringify({
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    hasPreview: true
+                });
+                
+                // Guardar o data URL para preview
+                newElement.dataset.previewData = dataUrl;
+                
+                console.log('Preview da imagem:', dataUrl.substring(0, 50) + '...');
+                console.log('Imagem carregada com sucesso!');
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Suporte drag and drop
+        newElement.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            newElement.classList.add('border-blue-500', 'bg-blue-50');
+        });
+        
+        newElement.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            newElement.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+        
+        newElement.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            newElement.classList.remove('border-blue-500', 'bg-blue-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+        
+        if (elementId === 'productImageUpload') {
+            window.imageUploadInstance = {
+                reset: () => {
+                    newPreviewImg.src = '/images/placeholders/product-placeholder.svg';
+                    fileInput.value = '';
+                    delete newElement.dataset.imageChanged;
+                    delete newElement.dataset.imageFile;
+                    delete newElement.dataset.previewData;
+                },
+                setImage: (url) => {
+                    // Se for URL externa (editando produto existente)
+                    if (url && !url.startsWith('data:')) {
+                        newPreviewImg.src = url;
+                    } else {
+                        newPreviewImg.src = '/images/placeholders/product-placeholder.svg';
+                    }
+                }
+            };
+        }
+        
+        console.log(`Upload simples inicializado com sucesso para ${elementId}`);
+    }
+
+    // Função para exibir erros de validação
+    function displayFormErrors(errors, form) {
+        // Limpar erros anteriores
+        clearFormErrors(form);
+        
+        if (!errors || !Array.isArray(errors)) return;
+        
+        errors.forEach(error => {
+            const field = error.field;
+            const message = error.message;
+            
+            // Encontrar o input pelo name
+            const input = form.querySelector(`[name="${field}"]`);
+            if (!input) return;
+            
+            // Adicionar classe de erro visual
+            input.classList.add('border-red-500', 'bg-red-50', 'focus:border-red-500', 'focus:ring-red-500/10');
+            
+            // Criar mensagem de erro
+            const errorElement = document.createElement('span');
+            errorElement.className = 'text-red-500 text-xs font-medium mt-1 block error-message';
+            errorElement.textContent = message;
+            
+            // Inserir após o input
+            input.parentNode.insertBefore(errorElement, input.nextSibling);
+        });
+        
+        // Scroll para o primeiro erro
+        const firstError = form.querySelector('.error-message');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    
+    // Função para limpar erros do formulário
+    function clearFormErrors(form) {
+        // Remover classes de erro dos inputs
+        form.querySelectorAll('.border-red-500, .bg-red-50, .focus\\:border-red-500, .focus\\:ring-red-500\\/10').forEach(input => {
+            input.classList.remove('border-red-500', 'bg-red-50', 'focus:border-red-500', 'focus:ring-red-500/10');
+        });
+        
+        // Remover mensagens de erro
+        form.querySelectorAll('.error-message').forEach(error => {
+            error.remove();
+        });
+    }
+    
+    // Intercepta o envio do formulário para tratar erros
+    function interceptFormSubmit() {
+        const form = document.querySelector('#productModalForm');
+        if (!form) {
+            console.log('Formulário não encontrado');
+            return;
+        }
+        
+        console.log('Interceptando formulário:', form.action);
+        
+        // Remover listener anterior se existir para evitar duplicação
+        if (form._submitHandler) {
+            form.removeEventListener('submit', form._submitHandler);
+        }
+        
+        form._submitHandler = async function(e) {
+            console.log('Formulário submetido, interceptando...');
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            console.log('FormData entries:');
+            for (let [key, value] of formData.entries()) {
+                if (value instanceof File) {
+                    console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
+                } else {
+                    console.log(`${key}: ${value}`);
+                }
+            }
+            
+            // Desabilitar botão e mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Salvando...';
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Sucesso
+                    const isUpdate = form.action.includes('/update');
+                    window.notify(isUpdate ? 'Produto atualizado com sucesso!' : 'Produto salvo com sucesso!', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    // Erro de validação
+                    if (result.details && Array.isArray(result.details)) {
+                        displayFormErrors(result.details, form);
+                        window.notify('Corrija os erros no formulário', 'error');
+                    } else {
+                        window.notify(result.error || 'Erro ao salvar produto', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Erro no envio:', error);
+                window.notify('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                // Restaurar botão
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        };
+        
+        form.addEventListener('submit', form._submitHandler);
+        console.log('Handler de submit adicionado ao formulário');
+    }
+    
+    // Inicializar interceptor e upload quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            interceptFormSubmit();
+            
+            // Inicializar upload de imagem apenas uma vez
+            const imageUpload = document.getElementById('productImageUpload');
+            if (imageUpload && !imageUpload._initialized) {
+                initializeSimpleImageUpload('productImageUpload');
+                imageUpload._initialized = true;
+                console.log('Upload de imagem inicializado no DOMContentLoaded');
+            }
+        }, 200);
+    });
+    
+    // Re-inicializar quando a modal for aberta
+    const originalToggleModal = toggleModal;
+    toggleModal = function(id) {
+        originalToggleModal(id);
+        if (id === 'productModal' && !document.getElementById(id).classList.contains('hidden')) {
+            setTimeout(() => {
+                interceptFormSubmit();
+                
+                // Garantir que o upload está inicializado
+                const imageUpload = document.getElementById('productImageUpload');
+                if (imageUpload && !imageUpload._initialized) {
+                    initializeSimpleImageUpload('productImageUpload');
+                    imageUpload._initialized = true;
+                    console.log('Upload de imagem inicializado ao abrir modal');
+                }
+            }, 100);
+        }
+    };
 </script>

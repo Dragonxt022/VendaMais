@@ -17,6 +17,19 @@ const handleValidationErrors = (req, res, next) => {
       value: error.value
     }));
 
+    // Se houver arquivo enviado e erro de validação, remover o arquivo
+    if (req.file && req.file.path) {
+      const fs = require('fs');
+      try {
+        if (fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+            console.log('[CLEANUP] Imagem removida por erro de validação:', req.file.path);
+        }
+      } catch (err) {
+        console.error('[CLEANUP] Erro ao remover imagem:', err);
+      }
+    }
+
     console.log(`[VALIDATION ERROR] Path: ${req.originalUrl} | Errors:`, JSON.stringify(formattedErrors, null, 2));
     
     // Verificar se é requisição AJAX ou API

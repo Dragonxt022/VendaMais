@@ -10,6 +10,15 @@ const auth = require('../middleware/auth');
 const license = require('../middleware/license');
 const multer = require('multer');
 const path = require('path');
+const { createUploadMiddleware } = require('../middleware/uploadMiddleware');
+
+// Product upload configuration
+const productUpload = createUploadMiddleware({
+  destination: 'public/uploads',
+  subDirectory: 'products',
+  fieldName: 'image'
+});
+
 
 // Importar validações
 const {
@@ -61,20 +70,67 @@ router.get('/products', auth, license, async function(req, res, next) {
 });
 
 /* POST create product. */
-router.post('/products', auth, ...productValidations.create, async function(req, res, next) {
+/* POST create product. */
+router.post('/products', auth, productUpload, ...productValidations.create, async function(req, res, next) {
   try {
-    await ProductController.createProduct(req, res);
+    const result = await ProductController.createProduct(req, res);
+    
+    // Se for AJAX/Fetch, retornar JSON
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.json({ success: true, ...result });
+    }
+    
     res.redirect('/app/products');
   } catch (err) {
+    console.error('Erro ao criar produto:', err);
+    
+    // Se houver erro e uma imagem foi enviada, deletar a imagem
+    if (req.file && req.file.path) {
+      const fs = require('fs');
+      try {
+        if (fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+            console.log('[CLEANUP] Imagem removida após erro:', req.file.path);
+        }
+      } catch (cleanupErr) {
+        console.error('[CLEANUP] Erro ao remover imagem:', cleanupErr);
+      }
+    }
+    
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.status(500).json({ error: err.message || 'Erro interno ao criar produto' });
+    }
     next(err);
   }
 });
 
-router.post('/products/:id/update', auth, ...productValidations.update, async function(req, res, next) {
+router.post('/products/:id/update', auth, productUpload, ...productValidations.update, async function(req, res, next) {
   try {
-    await ProductController.updateProduct(req, res);
+    const result = await ProductController.updateProduct(req, res);
+    
+    // Se for AJAX/Fetch, retornar JSON
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.json({ success: true, ...result });
+    }
+    
     res.redirect('/app/products');
   } catch (err) {
+    console.error('Erro ao atualizar produto:', err);
+    
+    // Se houver erro e uma imagem foi enviada, deletar a imagem
+    if (req.file && req.file.path) {
+      const fs = require('fs');
+      try {
+        fs.unlinkSync(req.file.path);
+        console.log('[CLEANUP] Imagem removida após erro:', req.file.path);
+      } catch (cleanupErr) {
+        console.error('[CLEANUP] Erro ao remover imagem:', cleanupErr);
+      }
+    }
+    
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.status(500).json({ error: err.message || 'Erro interno ao atualizar produto' });
+    }
     next(err);
   }
 });
