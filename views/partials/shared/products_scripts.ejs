@@ -384,7 +384,19 @@
         
         const manageStock = dataDiv.dataset.manageStock === 'true';
         form.manage_stock.checked = manageStock;
+        
+        // Primeiro definir o estado e depois popular os campos
         toggleStockFields(form.manage_stock);
+        
+        // Se estiver gerenciando estoque, preencher os valores
+        if (manageStock) {
+            form.min_stock.value = dataDiv.dataset.minStock || '';
+            // Preencher quantidade atual como quantidade inicial na edição
+            const initialStockInput = form.querySelector('input[name="initial_stock"]');
+            if (initialStockInput) {
+                initialStockInput.value = dataDiv.dataset.currentStock || '0';
+            }
+        }
 
         if (form.category_id) form.category_id.value = dataDiv.dataset.categoryId || '';
         if (form.supplier_id) form.supplier_id.value = dataDiv.dataset.supplierId || '';
@@ -424,6 +436,7 @@
         const form = modal.querySelector('form');
         form.reset();
         form.action = '/app/products';
+        // Resetar estado do gerenciamento de estoque
         form.manage_stock.checked = true;
         toggleStockFields(form.manage_stock);
         
@@ -512,11 +525,19 @@
         if (checkbox.checked) {
             fields.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
             fields.classList.add('contents');
-            fields.querySelectorAll('input').forEach(i => i.required = true);
+            fields.querySelectorAll('input').forEach(i => {
+                i.required = true;
+                i.removeAttribute('disabled');
+            });
         } else {
             fields.classList.remove('contents');
             fields.classList.add('hidden');
-            fields.querySelectorAll('input').forEach(i => i.required = false);
+            fields.querySelectorAll('input').forEach(i => {
+                i.required = false;
+                i.disabled = true;
+                // Limpar valores quando desativar
+                i.value = '';
+            });
         }
     }
 
@@ -524,45 +545,103 @@
     async function submitQuickCategory(e) {
         e.preventDefault();
         const formData = new URLSearchParams(new FormData(e.target));
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        
+        // Desabilitar botão e mostrar loading
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Salvando...';
+        
         try {
             const res = await fetch('/app/categories', {
                 method: 'POST',
                 body: formData,
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
             });
+            
+            const data = await res.json();
+            
             if (res.ok) {
-                const data = await res.json();
                 if (data.success && data.category) {
                     const select = document.getElementById('product_category_id');
                     select.add(new Option(data.category.name, data.category.id));
                     select.value = data.category.id;
                     toggleModal('quickCategoryModal');
                     e.target.reset();
+                    window.notify('Categoria cadastrada com sucesso!', 'success');
+                } else {
+                    window.notify('Erro ao cadastrar categoria', 'error');
+                }
+            } else {
+                // Erro de validação ou outro erro
+                if (data.details && Array.isArray(data.details)) {
+                    // Exibir erros específicos
+                    data.details.forEach(error => {
+                        window.notify(error.message, 'error');
+                    });
+                } else {
+                    window.notify(data.error || 'Erro ao cadastrar categoria', 'error');
                 }
             }
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            console.error('Erro na requisição:', err);
+            window.notify('Erro de conexão. Tente novamente.', 'error');
+        } finally {
+            // Restaurar botão
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
     }
 
     async function submitQuickSupplier(e) {
         e.preventDefault();
         const formData = new URLSearchParams(new FormData(e.target));
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        
+        // Desabilitar botão e mostrar loading
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Salvando...';
+        
         try {
             const res = await fetch('/app/suppliers', {
                 method: 'POST',
                 body: formData,
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
             });
+            
+            const data = await res.json();
+            
             if (res.ok) {
-                const data = await res.json();
                 if (data.success && data.supplier) {
                     const select = document.getElementById('product_supplier_id');
                     select.add(new Option(data.supplier.name, data.supplier.id));
                     select.value = data.supplier.id;
                     toggleModal('quickSupplierModal');
                     e.target.reset();
+                    window.notify('Fornecedor cadastrado com sucesso!', 'success');
+                } else {
+                    window.notify('Erro ao cadastrar fornecedor', 'error');
+                }
+            } else {
+                // Erro de validação ou outro erro
+                if (data.details && Array.isArray(data.details)) {
+                    // Exibir erros específicos
+                    data.details.forEach(error => {
+                        window.notify(error.message, 'error');
+                    });
+                } else {
+                    window.notify(data.error || 'Erro ao cadastrar fornecedor', 'error');
                 }
             }
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            console.error('Erro na requisição:', err);
+            window.notify('Erro de conexão. Tente novamente.', 'error');
+        } finally {
+            // Restaurar botão
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        }
     }
 
     // Função simples para upload de imagem (solução direta)
@@ -867,20 +946,29 @@
         console.log('Handler de submit adicionado ao formulário');
     }
     
-    // Inicializar interceptor e upload quando a página carregar
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
+    // Função de teste para verificar se o interceptor funciona
+    window.testFormSubmit = function() {
+        const form = document.querySelector('#productModalForm');
+        if (form) {
+            console.log('Testando interceptor de formulário...');
             interceptFormSubmit();
-            
-            // Inicializar upload de imagem apenas uma vez
-            const imageUpload = document.getElementById('productImageUpload');
-            if (imageUpload && !imageUpload._initialized) {
-                initializeSimpleImageUpload('productImageUpload');
-                imageUpload._initialized = true;
-                console.log('Upload de imagem inicializado no DOMContentLoaded');
-            }
-        }, 200);
-    });
+        } else {
+            console.log('Formulário não encontrado para teste');
+        }
+    };
+    
+    // Inicializar quando a página carregar
+    setTimeout(() => {
+        interceptFormSubmit();
+        
+        // Inicializar upload de imagem apenas uma vez
+        const imageUpload = document.getElementById('productImageUpload');
+        if (imageUpload && !imageUpload._initialized) {
+            initializeSimpleImageUpload('productImageUpload');
+            imageUpload._initialized = true;
+            console.log('Upload de imagem inicializado');
+        }
+    }, 500);
     
     // Re-inicializar quando a modal for aberta
     const originalToggleModal = toggleModal;

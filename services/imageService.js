@@ -8,7 +8,10 @@ class ImageService {
 
   generateImageUrl(filePath) {
     if (!filePath) return null;
-    return `${this.baseUrl}/${filePath.replace(/\\/g, '/')}`;
+    const cleanPath = filePath.replace(/\\/g, '/');
+    // Garantir que comece com barra
+    const normalizedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+    return `${this.baseUrl}${normalizedPath}`;
   }
 
   deleteImage(imagePath) {
@@ -66,10 +69,21 @@ class ImageService {
     if (!file) return null;
     
     const relativePath = path.relative('public', file.path).replace(/\\/g, '/');
+    // Garantir que não comece com . ou ./ e sempre comece com /
+    const normalizedPath = relativePath.startsWith('.') ? relativePath.substring(1) : relativePath;
+    const finalPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`;
+    
+    console.log('[IMAGE SERVICE] Processando imagem:', {
+      originalPath: file.path,
+      relativePath: relativePath,
+      finalPath: finalPath,
+      generatedUrl: this.generateImageUrl(finalPath)
+    });
+    
     return {
-      url: this.generateImageUrl(relativePath),
+      url: this.generateImageUrl(finalPath),
       path: file.path,
-      relativePath,
+      relativePath: finalPath,
       size: file.size,
       mimetype: file.mimetype
     };

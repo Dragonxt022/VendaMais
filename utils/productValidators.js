@@ -12,7 +12,7 @@ const createProductValidation = [
     .withMessage("Nome deve ter entre 2 e 200 caracteres"),
 
   body("sku")
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 1, max: 50 })
     .withMessage("SKU deve ter entre 1 e 50 caracteres")
@@ -22,7 +22,7 @@ const createProductValidation = [
     ),
 
   body("ean")
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 8, max: 13 })
     .withMessage("EAN deve ter entre 8 e 13 caracteres")
@@ -70,18 +70,38 @@ const createProductValidation = [
     }),
 
   body("initial_stock")
-    .optional({ checkFalsy: true })
-    .isInt({ min: 0, max: 999999 })
-    .withMessage(
-      "Estoque inicial deve ser um número inteiro não negativo (máximo: 999999)",
-    ),
+    .custom((value, { req }) => {
+      // Se não estiver gerenciando estoque, não validar
+      if (req.body.manage_stock !== 'on' && req.body.manage_stock !== true) {
+        return true;
+      }
+      
+      // Se estiver gerenciando estoque e tiver valor, validar
+      if (value && value !== '') {
+        const numValue = parseInt(value);
+        if (isNaN(numValue) || numValue < 0 || numValue > 999999) {
+          throw new Error("Estoque inicial deve ser um número inteiro não negativo (máximo: 999999)");
+        }
+      }
+      return true;
+    }),
 
   body("min_stock")
-    .optional()
-    .isInt({ min: 0, max: 999999 })
-    .withMessage(
-      "Estoque mínimo deve ser um número inteiro não negativo (máximo: 999999)",
-    ),
+    .custom((value, { req }) => {
+      // Se não estiver gerenciando estoque, não validar
+      if (req.body.manage_stock !== 'on' && req.body.manage_stock !== true) {
+        return true;
+      }
+      
+      // Se estiver gerenciando estoque e tiver valor, validar
+      if (value && value !== '') {
+        const numValue = parseInt(value);
+        if (isNaN(numValue) || numValue < 0 || numValue > 999999) {
+          throw new Error("Estoque mínimo deve ser um número inteiro não negativo (máximo: 999999)");
+        }
+      }
+      return true;
+    }),
 
   body("manage_stock")
     .optional()
@@ -123,7 +143,7 @@ const updateProductValidation = [
     .withMessage("Nome deve ter entre 2 e 200 caracteres"),
 
   body("sku")
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 1, max: 50 })
     .withMessage("SKU deve ter entre 1 e 50 caracteres")
@@ -133,7 +153,7 @@ const updateProductValidation = [
     ),
 
   body("ean")
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .isLength({ min: 8, max: 13 })
     .withMessage("EAN deve ter entre 8 e 13 caracteres")
@@ -177,11 +197,21 @@ const updateProductValidation = [
     }),
 
   body("min_stock")
-    .optional()
-    .isInt({ min: 0, max: 999999 })
-    .withMessage(
-      "Estoque mínimo deve ser um número inteiro não negativo (máximo: 999999)",
-    ),
+    .custom((value, { req }) => {
+      // Se não estiver gerenciando estoque, não validar
+      if (req.body.manage_stock !== 'on' && req.body.manage_stock !== true) {
+        return true;
+      }
+      
+      // Se estiver gerenciando estoque e tiver valor, validar
+      if (value && value !== '') {
+        const numValue = parseInt(value);
+        if (isNaN(numValue) || numValue < 0 || numValue > 999999) {
+          throw new Error("Estoque mínimo deve ser um número inteiro não negativo (máximo: 999999)");
+        }
+      }
+      return true;
+    }),
 
   body("manage_stock")
     .optional()
