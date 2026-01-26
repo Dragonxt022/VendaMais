@@ -70,7 +70,7 @@
                     <th class="pl-6 py-4 w-10">
                         <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" class="w-4 h-4 rounded border-slate-300 text-food-orange focus:ring-food-orange">
                     </th>
-                    <th class="px-4 py-4 w-10"></th>
+                    <th class="px-4 py-4 w-16"></th>
                     <th class="px-4 py-4 text-slate-500 font-semibold text-xs uppercase cursor-pointer" onclick="toggleSort('name')">
                         Produto <span class="ml-1 text-[10px]"><%= filters.sort === 'name' ? '▲' : '' %></span>
                     </th>
@@ -89,13 +89,22 @@
                                 <input type="checkbox" name="productSelect" value="<%= product.id %>" onchange="updateBulkUI()" class="w-4 h-4 rounded border-slate-300 text-food-orange focus:ring-food-orange">
                             </td>
                             <td class="px-4 py-4" onclick="event.stopPropagation()">
-                                <button onclick="toggleFavorite('<%= product.id %>')" class="text-xl transition-transform hover:scale-125 focus:outline-none">
+                                <div class="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                                    <img src="<%= product.image_url || '/images/placeholders/product-placeholder.svg' %>" 
+                                         alt="<%= product.name %>" 
+                                         class="w-full h-full object-cover"
+                                         onerror="this.src='/images/placeholders/product-placeholder.svg'">
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 flex items-center">
+                               <button onclick="toggleFavorite('<%= product.id %>')" class="mr-2 text-xl transition-transform hover:scale-125 focus:outline-none">
                                     <span id="fav-icon-<%= product.id %>" class="<%= product.is_favorite ? 'text-red-500' : 'text-slate-300 grayscale opacity-40 hover:opacity-100 hover:grayscale-0' %>">
-                                        <%= product.is_favorite ? '❤️' : '🤍' %>
+                                        <%- product.is_favorite ? 
+                                            '<img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">' : 
+                                            '<img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">' 
+                                        %>
                                     </span>
                                 </button>
-                            </td>
-                            <td class="px-4 py-4">
                                 <span class="font-medium text-slate-900 block"><%= product.name %></span>
                                 <% if (product.Supplier) { %>
                                     <span class="text-[10px] text-slate-400 uppercase tracking-wider"><%= product.Supplier.name %></span>
@@ -125,6 +134,21 @@
                                 <% } %>
                             </td>
                             <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
+                                <!-- Hidden data for edit modal -->
+                                <div id="product-data-<%= product.id %>" 
+                                     data-name="<%= product.name %>" 
+                                     data-sku="<%= product.sku || '' %>" 
+                                     data-price="<%= product.price %>" 
+                                     data-cost="<%= product.cost %>" 
+                                     data-min-stock="<%= product.min_stock %>" 
+                                     data-manage-stock="<%= product.manage_stock %>" 
+                                     data-category-id="<%= product.category_id || '' %>" 
+                                     data-supplier-id="<%= product.supplier_id || '' %>"
+                                     data-image-url="<%= product.image_url || '' %>"
+                                     data-ean="<%= product.ean || '' %>"
+                                     class="hidden">
+                                </div>
+                                
                                 <div class="relative inline-block text-left">
                                     <button 
                                         onclick="toggleDropdown(event, 'dropdown-<%= product.id %>')"
@@ -139,26 +163,26 @@
                                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Opções</p>
                                         </div>
                                         <button onclick="prepareEditModal('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span>✏️</span> Editar Produto
+                                            <span><img src="/uploads/icon/editar.svg" alt="Editar" class="w-6 h-6"></span> Editar Produto
                                         </button>
                                         <button onclick="prepareMoveModal('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span>📦</span> Ajustar Estoque
+                                            <span><img src="/uploads/icon/estoque.svg" alt="Estoque" class="w-6 h-6"></span> Ajustar Estoque
                                         </button>
                                         <button onclick="duplicateProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span>📋</span> Duplicar Item
+                                            <span><img src="/uploads/icon/duplicar.svg" alt="Duplicar" class="w-6 h-6"></span> Duplicar Item
                                         </button>
                                         <a href="/app/products/<%= product.id %>/history" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span>🕰️</span> Histórico de Estoque
+                                            <span><img src="/uploads/icon/historico.svg" alt="Histórico" class="w-6 h-6"></span> Histórico de Estoque
                                         </a>
                                         <button onclick="toggleFavorite('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                                            <span id="fav-btn-icon-<%= product.id %>"><%= product.is_favorite ? '💔' : '❤️' %></span> 
+                                            <span id="fav-btn-icon-<%= product.id %>"><%- product.is_favorite ? '<img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">' : '<img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">' %></span> 
                                             <span id="fav-btn-text-<%= product.id %>">
-                                                <%= product.is_favorite ? 'Remover Favorito' : 'Favoritar' %>
+                                                <%- product.is_favorite ? 'Remover Favorito' : 'Favoritar' %>
                                             </span>
                                         </button>
                                         <div class="border-t border-slate-100 mt-1 pt-1">
                                             <button onclick="deleteProduct('<%= product.id %>')" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                                <span>🗑️</span> Excluir Produto
+                                                <span><img src="/uploads/icon/excluir.svg" alt="Excluir" class="w-6 h-6"></span> Excluir Produto
                                             </button>
                                         </div>
                                     </div>

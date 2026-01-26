@@ -5,18 +5,37 @@
             <h2 class="text-xl font-bold text-slate-900">Cadastrar Produto</h2>
             <button onclick="toggleModal('productModal')" class="text-slate-400 hover:text-slate-600">×</button>
         </div>
-        <form action="/app/products" method="POST" class="p-6 grid grid-cols-2 gap-4">
+        <form action="/app/products" method="POST" enctype="multipart/form-data" class="p-6 grid grid-cols-2 gap-4">
             <div class="col-span-2">
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Nome</label>
-                <input type="text" name="name" required class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                <div class="flex gap-6 items-start">
+                    <div id="productImageUpload" data-image-upload="product" class="w-32 h-32 flex-shrink-0 relative overflow-hidden rounded-xl border-2 border-dashed border-slate-200 hover:border-food-orange transition-all duration-200 cursor-pointer bg-slate-50 hover:bg-slate-100 flex items-center justify-center"></div>
+                    <div class="flex-1 space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">EAN (Código de Barras)</label>
+                            <div class="flex gap-2">
+                                <input type="text" name="ean" id="product_ean" maxlength="13" class="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange focus:ring-2 focus:ring-food-orange/10 transition-all font-mono" placeholder="789...">
+                                <button type="button" onclick="searchGlobalCatalog()" id="btnSearchEan" class="px-3 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors" title="Pesquisar no Catálogo Global">
+                                    <img src="/uploads/icon/search.svg" alt="Pesquisar" class="w-6 h-6">
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nome do Produto</label>
+                            <input type="text" name="name" id="product_name" required class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange focus:ring-2 focus:ring-food-orange/10 transition-all" placeholder="Ex: Coca-Cola 2L">
+                        </div>
+                    </div>
+                </div>
             </div>
             <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">SKU</label>
-                <input type="text" name="sku" class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">SKU / Ref</label>
+                <input type="text" name="sku" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange transition-all">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Pç. Venda</label>
-                <input type="number" step="0.01" name="price" required class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Preço de Venda</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
+                    <input type="number" step="0.01" name="price" required class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange transition-all">
+                </div>
             </div>
             <div class="col-span-2 flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
                 <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
@@ -29,22 +48,25 @@
 
             <div id="stockFields" class="contents">
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Pç. Custo</label>
-                    <input type="number" step="0.01" name="cost" class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Preço de Custo</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">R$</span>
+                        <input type="number" step="0.01" name="cost" class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange transition-all">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Qtd. Inicial</label>
-                    <input type="number" name="initial_stock" class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd. Inicial</label>
+                    <input type="number" name="initial_stock" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange transition-all">
                 </div>
                 <div class="col-span-2">
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Estoque Mínimo</label>
-                    <input type="number" name="min_stock" class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Estoque Mínimo</label>
+                    <input type="number" name="min_stock" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange transition-all">
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Categoria</label>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Categoria</label>
                 <div class="flex gap-2">
-                    <select id="product_category_id" name="category_id" class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                    <select id="product_category_id" name="category_id" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange transition-all appearance-none cursor-pointer">
                         <option value="">Sem Categoria</option>
                         <% if (typeof categories !== 'undefined') { %>
                             <% categories.forEach(c => { %>
@@ -52,13 +74,13 @@
                             <% }) %>
                         <% } %>
                     </select>
-                    <button type="button" onclick="toggleModal('quickCategoryModal')" class="px-3 py-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors" title="Nova Categoria">+</button>
+                    <button type="button" onclick="toggleModal('quickCategoryModal')" class="px-3 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors" title="Nova Categoria">+</button>
                 </div>
             </div>
             <div class="col-span-2">
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Fornecedor Principal</label>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fornecedor Principal</label>
                 <div class="flex gap-2">
-                    <select id="product_supplier_id" name="supplier_id" class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:border-food-orange transition-all">
+                    <select id="product_supplier_id" name="supplier_id" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-food-orange transition-all appearance-none cursor-pointer">
                         <option value="">Sem Fornecedor</option>
                         <% if (typeof suppliers !== 'undefined') { %>
                             <% suppliers.forEach(s => { %>
@@ -66,7 +88,7 @@
                             <% }) %>
                         <% } %>
                     </select>
-                    <button type="button" onclick="toggleModal('quickSupplierModal')" class="px-3 py-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors" title="Novo Fornecedor">+</button>
+                    <button type="button" onclick="toggleModal('quickSupplierModal')" class="px-3 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors" title="Novo Fornecedor">+</button>
                 </div>
             </div>
             <div class="col-span-2 pt-4">

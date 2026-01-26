@@ -1,6 +1,6 @@
 const { User } = require('../../models');
-const path = require('path');
-const fs = require('fs');
+const { createUploadMiddleware } = require('../../middleware/uploadMiddleware');
+const imageService = require('../../services/imageService');
 
 class ProfileController {
     async index(req, res) {
@@ -17,7 +17,21 @@ class ProfileController {
 
     async update(req, res, next) {
         try {
-            const { name, email, cpf_cnpj } = req.body;
+            // Execute upload middleware
+            const uploadMiddleware = createUploadMiddleware({
+                destination: 'public/uploads',
+                subDirectory: 'avatars',
+                fieldName: 'avatar'
+            });
+
+            await new Promise((resolve, reject) => {
+                uploadMiddleware(req, res, (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+
+            const { name, email, cpf_cnpj, removeAvatar } = req.body;
             const userId = req.session.user.id;
 
             if (!name || !email) {
@@ -33,14 +47,17 @@ class ProfileController {
             const user = await User.findByPk(userId);
             const updateData = { name, email, cpf_cnpj };
 
+            // Handle avatar upload or removal
             if (req.file) {
+                // Delete old avatar if exists
                 if (user.avatar) {
-                    const oldAvatarPath = path.join(__dirname, '../../../public', user.avatar);
-                    if (fs.existsSync(oldAvatarPath)) {
-                        fs.unlinkSync(oldAvatarPath);
-                    }
+                    imageService.deleteImage(user.avatar);
                 }
-                updateData.avatar = `/uploads/avatars/${req.file.filename}`;
+                const imageData = imageService.processUploadedImage(req.file, 'avatars');
+                updateData.avatar = imageData.relativePath;
+            } else if (removeAvatar === 'true' && user.avatar) {
+                imageService.deleteImage(user.avatar);
+                updateData.avatar = null;
             }
 
             await user.update(updateData);

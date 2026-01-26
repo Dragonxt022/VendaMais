@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
+      logo_url: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
     {
       tableName: "companies",

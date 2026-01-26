@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">64.28% </span>
+                <span class="strong">14.28% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>9/14</span>
+                <span class='fraction'>2/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">58.33% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>7/12</span>
+                <span class='fraction'>0/13</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">64.28% </span>
+                <span class="strong">14.28% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>9/14</span>
+                <span class='fraction'>2/14</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -94,25 +94,25 @@
 <a name='L29'></a><a href='#L29'>29</a>
 <a name='L30'></a><a href='#L30'>30</a>
 <a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">6x</span>
+<a name='L32'></a><a href='#L32'>32</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -120,30 +120,30 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const { Company } = require('../models');
 &nbsp;
-module.exports = async (req, res, next) =&gt; {
-  try {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!req.user || !req.user.company_id) {
+module.exports = <span class="fstat-no" title="function not covered" >as</span>ync (req, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >  try {</span>
+<span class="cstat-no" title="statement not covered" >    if (!req.user || !req.user.company_id || req.user.role === 'admin') {</span>
 <span class="cstat-no" title="statement not covered" >      return next();</span>
     }
 &nbsp;
-    const company = await Company.findByPk(req.user.company_id);
+    const company = <span class="cstat-no" title="statement not covered" >await Company.findByPk(req.user.company_id);</span>
 &nbsp;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!company) {
+<span class="cstat-no" title="statement not covered" >    if (!company) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).send('Empresa não encontrada.');</span>
     }
 &nbsp;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (company.status !== 'active') {
+<span class="cstat-no" title="statement not covered" >    if (company.status !== 'active') {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).send('Sua conta está inativa. Entre em contato com o suporte.');</span>
     }
 &nbsp;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (company.trial_expires_at &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >new Date() &gt; new Date(company.trial_expires_at))</span> {
+<span class="cstat-no" title="statement not covered" >    if (company.trial_expires_at &amp;&amp; new Date() &gt; new Date(company.trial_expires_at)) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).render('site/pages/trial-expired', {</span>
         layout: 'site/layouts/site',
         title: 'Teste Expirado - VendaMais',
@@ -151,7 +151,7 @@ module.exports = async (req, res, next) =&gt; {
       });
     }
 &nbsp;
-    next();
+<span class="cstat-no" title="statement not covered" >    next();</span>
   } catch (err) {
 <span class="cstat-no" title="statement not covered" >    next(err);</span>
   }
@@ -163,7 +163,7 @@ module.exports = async (req, res, next) =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-24T19:39:13.865Z
+                at 2026-01-25T18:46:33.252Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

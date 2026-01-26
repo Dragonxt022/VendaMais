@@ -1,5 +1,7 @@
 const { Product, Category, Supplier, Sequelize } = require('../../models');
 const { Op } = Sequelize;
+const { createUploadMiddleware } = require('../../middleware/uploadMiddleware');
+const imageService = require('../../services/imageService');
 
 module.exports = {
   // List all products for the company with pagination, search, and filtering
@@ -78,8 +80,28 @@ module.exports = {
   // Create a new product
   async createProduct(req, res) {
     try {
+      const uploadMiddleware = createUploadMiddleware({
+        destination: 'public/uploads',
+        subDirectory: 'products',
+        fieldName: 'image'
+      });
+
+      // Execute upload middleware
+      await new Promise((resolve, reject) => {
+        uploadMiddleware(req, res, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
       const { company_id } = req.user;
-      const { name, sku, description, price, cost, min_stock, initial_stock, category_id, supplier_id, manage_stock } = req.body;
+      const { name, sku, ean, description, price, cost, min_stock, initial_stock, category_id, supplier_id, manage_stock } = req.body;
+      
+      let imageUrl = null;
+      if (req.file) {
+        const imageData = imageService.processUploadedImage(req.file, 'products');
+        imageUrl = imageData.relativePath;
+      }
       
       const product = await Product.create({
         company_id,
@@ -92,7 +114,8 @@ module.exports = {
         min_stock: min_stock || 0,
         manage_stock: manage_stock === 'on' || manage_stock === true,
         category_id: category_id || null,
-        supplier_id: supplier_id || null
+        supplier_id: supplier_id || null,
+        image_url: imageUrl
       });
       
       return { product };
@@ -104,12 +127,41 @@ module.exports = {
   // Update a product
   async updateProduct(req, res) {
     try {
+      const uploadMiddleware = createUploadMiddleware({
+        destination: 'public/uploads',
+        subDirectory: 'products',
+        fieldName: 'image'
+      });
+
+      // Execute upload middleware
+      await new Promise((resolve, reject) => {
+        uploadMiddleware(req, res, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
       const { company_id } = req.user;
       const { id } = req.params;
-      const { name, sku, description, price, cost, min_stock, category_id, supplier_id, manage_stock } = req.body;
+      const { name, sku, ean, description, price, cost, min_stock, category_id, supplier_id, manage_stock, removeImage } = req.body;
 
       const product = await Product.findOne({ where: { id, company_id } });
       if (!product) throw new Error('Produto não encontrado');
+
+      let imageUrl = product.image_url;
+
+      // Handle image upload or removal
+      if (req.file) {
+        // Delete old image if exists
+        if (product.image_url) {
+          imageService.deleteImage(product.image_url);
+        }
+        const imageData = imageService.processUploadedImage(req.file, 'products');
+        imageUrl = imageData.relativePath;
+      } else if (removeImage === 'true' && product.image_url) {
+        imageService.deleteImage(product.image_url);
+        imageUrl = null;
+      }
 
       await product.update({
         name,
@@ -120,7 +172,8 @@ module.exports = {
         min_stock: min_stock || 0,
         manage_stock: manage_stock === 'on' || manage_stock === true,
         category_id: category_id || null,
-        supplier_id: supplier_id || null
+        supplier_id: supplier_id || null,
+        image_url: imageUrl
       });
 
       return { product };

@@ -55,6 +55,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    image_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     tableName: 'products',
     timestamps: true,

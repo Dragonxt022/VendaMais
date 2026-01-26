@@ -265,6 +265,12 @@
         submitBtn.innerText = 'Atualizar Produto';
         form.action = `/app/products/${id}/update`;
 
+        // Reset image upload
+        const imageUpload = document.getElementById('productImageUpload');
+        if (imageUpload && window.imageUploadInstance) {
+            window.imageUploadInstance.reset();
+        }
+
         form.name.value = dataDiv.dataset.name;
         form.sku.value = dataDiv.dataset.sku;
         form.price.value = dataDiv.dataset.price;
@@ -277,6 +283,18 @@
 
         if (form.category_id) form.category_id.value = dataDiv.dataset.categoryId || '';
         if (form.supplier_id) form.supplier_id.value = dataDiv.dataset.supplierId || '';
+        if (form.ean) form.ean.value = dataDiv.dataset.ean || '';
+
+        // Set existing image
+        const imageUrl = dataDiv.dataset.imageUrl;
+        if (imageUpload && imageUrl) {
+            if (!window.imageUploadInstance) {
+                window.imageUploadInstance = new ImageUpload('#productImageUpload', {
+                    fallbackImage: '/images/placeholders/product-placeholder.svg'
+                });
+            }
+            window.imageUploadInstance.setImage(imageUrl);
+        }
 
         toggleModal('productModal');
     }
@@ -298,8 +316,65 @@
         form.manage_stock.checked = true;
         toggleStockFields(form.manage_stock);
         
+        // Reset image upload
+        const imageUpload = document.getElementById('productImageUpload');
+        if (imageUpload && window.imageUploadInstance) {
+            window.imageUploadInstance.reset();
+        }
+        
         modal.querySelector('h2').innerText = 'Cadastrar Produto';
         modal.querySelector('button[type="submit"]').innerText = 'Salvar Produto';
+        
+        // Remove success highlight from EAN if present
+        const eanInput = document.getElementById('product_ean');
+        if (eanInput) {
+            eanInput.classList.remove('border-green-500', 'bg-green-50');
+        }
+    }
+
+    async function searchGlobalCatalog() {
+        const eanInput = document.getElementById('product_ean');
+        const ean = eanInput.value.trim();
+        const btn = document.getElementById('btnSearchEan');
+
+        if (ean.length < 8) {
+            window.notify('EAN inválido (mínimo 8 dígitos)', 'warning');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '⏳';
+        eanInput.classList.add('opacity-50');
+
+        try {
+            const res = await fetch(`/app/global-catalog/${ean}`);
+            const data = await res.json();
+
+            if (data.success) {
+                const product = data.product;
+                document.getElementById('product_name').value = product.name;
+                
+                // Autofill image if possible
+                if (product.image_url && window.imageUploadInstance) {
+                    window.imageUploadInstance.setImage(product.image_url);
+                }
+
+                eanInput.classList.remove('border-slate-200');
+                eanInput.classList.add('border-green-500', 'bg-green-50');
+                
+                window.notify('Produto encontrado no catálogo global!', 'success');
+            } else {
+                window.notify('Produto não encontrado no catálogo global. Você pode cadastrá-lo manualmente.', 'info');
+                eanInput.classList.remove('border-green-500', 'bg-green-50');
+            }
+        } catch (err) {
+            console.error(err);
+            window.notify('Erro ao pesquisar catálogo global', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '🔍';
+            eanInput.classList.remove('opacity-50');
+        }
     }
 
     function toggleStockFields(checkbox) {

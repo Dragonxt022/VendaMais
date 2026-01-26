@@ -1,0 +1,5 @@
+<svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="60" rx="4" fill="#F9FAFB"/>
+  <rect x="10" y="15" width="40" height="30" rx="2" fill="#D1D5DB"/>
+  <text x="25" y="35" font-family="Arial" font-size="8" fill="#6B7280" text-anchor="middle">LOGO</text>
+</svg>

@@ -99,6 +99,7 @@ router.post('/products/:id/duplicate', auth, ...productValidations.duplicate, as
   }
 });
 
+const GlobalCatalogController = require('../controllers/user/GlobalCatalogController');
 /* POST bulk actions. */
 router.post('/products/bulk-delete', auth, ...productValidations.bulkDelete, async function(req, res, next) {
   try {
@@ -122,6 +123,15 @@ router.post('/products/bulk-adjust', auth, ...productValidations.bulkAdjust, asy
 router.get('/products/search', auth, ...productValidations.search, async function(req, res, next) {
   try {
     await ProductController.search(req, res);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/* GET Global Catalog search. */
+router.get('/global-catalog/:ean', auth, async function(req, res, next) {
+  try {
+    await GlobalCatalogController.searchByEan(req, res);
   } catch (err) {
     next(err);
   }
