@@ -354,16 +354,14 @@
         submitBtn.innerText = 'Atualizar Produto';
         form.action = `/app/products/${id}/update`;
 
-        // NÃO resetar imagem ao editar (apenas ao criar novo)
-        // A imagem será configurada depois com setImage()
-        
         // Limpar erros anteriores
         clearFormErrors(form);
 
+        // Preencher campos do formulário
         form.name.value = dataDiv.dataset.name;
         form.sku.value = dataDiv.dataset.sku;
         
-        // Formatar valores de preço para o padrão brasileiro ao editar
+        // Formatar valores de preço
         const price = dataDiv.dataset.price;
         const cost = dataDiv.dataset.cost;
         
@@ -372,8 +370,7 @@
         
         form.min_stock.value = dataDiv.dataset.minStock;
 
-        
-        // Preencher quantidade atual como quantidade inicial na edição
+        // Preencher quantidade atual
         const initialStockInput = form.querySelector('input[name="initial_stock"]');
         if (initialStockInput) {
             initialStockInput.value = dataDiv.dataset.currentStock || '0';
@@ -388,8 +385,6 @@
         // Se estiver gerenciando estoque, preencher os valores
         if (manageStock) {
             form.min_stock.value = dataDiv.dataset.minStock || '';
-            // Preencher quantidade atual como quantidade inicial na edição
-            const initialStockInput = form.querySelector('input[name="initial_stock"]');
             if (initialStockInput) {
                 initialStockInput.value = dataDiv.dataset.currentStock || '0';
             }
@@ -399,35 +394,70 @@
         if (form.supplier_id) form.supplier_id.value = dataDiv.dataset.supplierId || '';
         if (form.ean) form.ean.value = dataDiv.dataset.ean || '';
 
-        // Set existing image
-        const imageUpload = document.getElementById('productImageUpload');
+        // **CORREÇÃO PRINCIPAL**: Aguardar o modal abrir completamente antes de configurar a imagem
         const imageUrl = dataDiv.dataset.imageUrl;
-        console.log('DEBUG: imageUrl =', imageUrl);
-        console.log('DEBUG: imageUpload =', imageUpload);
-        console.log('DEBUG: imageUpload.imageUpload =', imageUpload?.imageUpload);
-        console.log('DEBUG: window.imageUploadInstance =', window.imageUploadInstance);
         
-        if (imageUpload && imageUrl) {
-            console.log('Configurando imagem existente:', imageUrl);
-            const instance = imageUpload.imageUpload || window.imageUploadInstance;
-            if (instance) {
-                console.log('Usando instância para setImage:', imageUrl);
-                instance.setImage(imageUrl);
-            } else {
-                // Se não houver instância, configurar manualmente
-                const previewImg = imageUpload.querySelector('img');
-                if (previewImg) {
-                    previewImg.src = imageUrl;
+        // Função para configurar a imagem após o modal estar visível
+        const configureImage = () => {
+            const imageUpload = document.getElementById('productImageUpload');
+            if (!imageUpload || !imageUrl) return;
+            
+            console.log('DEBUG: Tentando configurar imagem:', imageUrl);
+            console.log('DEBUG: Elemento imageUpload encontrado:', imageUpload);
+            
+            // Encontrar a tag img dentro do elemento de upload
+            const previewImg = imageUpload.querySelector('img');
+            if (previewImg) {
+                console.log('DEBUG: PreviewImg encontrado:', previewImg);
+                
+                // Se a URL da imagem for válida, configurar
+                if (imageUrl && imageUrl !== 'null' && imageUrl !== 'undefined') {
+                    // Adicionar timestamp para evitar cache
+                    const timestamp = new Date().getTime();
+                    const imageUrlWithTimestamp = `${imageUrl}?t=${timestamp}`;
+                    
+                    // Configurar a imagem
+                    previewImg.src = imageUrlWithTimestamp;
+                    previewImg.alt = 'Imagem do produto';
+                    
+                    // Marcar que a imagem não foi alterada
                     imageUpload.dataset.imageChanged = 'false';
-                    imageUpload.dataset.initialImageUrl = imageUrl; // Guardar para referência
-                    console.log('Imagem configurada manualmente:', imageUrl);
+                    imageUpload.dataset.initialImageUrl = imageUrl;
+                    
+                    console.log('DEBUG: Imagem configurada com sucesso:', imageUrlWithTimestamp);
                 } else {
-                    console.log('PreviewImg não encontrado para configurar imagem');
+                    // Usar placeholder se não houver imagem
+                    previewImg.src = '/images/placeholders/product-placeholder.svg';
+                    console.log('DEBUG: URL da imagem inválida, usando placeholder');
+                }
+            } else {
+                console.log('DEBUG: PreviewImg NÃO encontrado dentro do imageUpload');
+                
+                // Tentar configurar via window.imageUploadInstance se disponível
+                if (window.imageUploadInstance && typeof window.imageUploadInstance.setImage === 'function') {
+                    console.log('DEBUG: Usando window.imageUploadInstance.setImage()');
+                    window.imageUploadInstance.setImage(imageUrl);
                 }
             }
-        }
+        };
 
+        // Abrir o modal
         toggleModal('productModal');
+        
+        // Aguardar um pequeno delay para garantir que o modal está visível
+        // e os elementos estão renderizados
+        setTimeout(() => {
+            configureImage();
+            
+            // Tentar novamente após mais tempo se ainda não funcionou
+            setTimeout(() => {
+                const checkImg = document.querySelector('#productImageUpload img');
+                if (checkImg && (!checkImg.src || checkImg.src.includes('placeholder'))) {
+                    console.log('DEBUG: Tentando configurar imagem novamente...');
+                    configureImage();
+                }
+            }, 500);
+        }, 300);
     }
 
     function prepareMoveModal(productId) {
@@ -652,6 +682,8 @@
         }
     }
 
+    
+
     // Função simples para upload de imagem (solução direta)
     function initializeSimpleImageUpload(elementId) {
         const element = document.getElementById(elementId);
@@ -662,177 +694,139 @@
         
         console.log(`Inicializando upload simples para ${elementId}`);
         
-        // Limpar o elemento completamente
-        element.innerHTML = '';
+        // Verificar se já está inicializado
+        if (element._initialized) {
+            console.log(`Elemento ${elementId} já inicializado`);
+            return;
+        }
         
-        // Adicionar ao formulário e associar ID ao label
+        // Limpar conteúdo existente apenas se necessário
+        if (!element.querySelector('input[type="file"]')) {
+            element.innerHTML = '';
+        }
+        
+        // Adicionar ao formulário
         const form = element.closest('form');
-        if (form) {
-            // IMPORTANTE: Remover todos os inputs de imagem antigos para evitar duplicatas
-            const oldImageInputs = form.querySelectorAll('input[name="image"]');
-            oldImageInputs.forEach(input => {
-                if (input.id && input.id.startsWith('image_input_')) {
-                    input.remove();
+        
+        // Criar input de arquivo se não existir
+        let fileInput = element.querySelector('input[type="file"]');
+        if (!fileInput && form) {
+            fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.name = 'image';
+            fileInput.accept = 'image/jpeg,image/jpg,image/png,image/gif,image/webp';
+            fileInput.style.display = 'none';
+            
+            const inputId = `image_input_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            fileInput.id = inputId;
+            element.htmlFor = inputId;
+            form.appendChild(fileInput);
+        }
+        
+        // Criar/obter preview da imagem
+        let previewImg = element.querySelector('img');
+        if (!previewImg) {
+            previewImg = document.createElement('img');
+            previewImg.className = 'w-full h-full object-cover pointer-events-none';
+            previewImg.src = '/images/placeholders/product-placeholder.svg';
+            previewImg.alt = 'Preview';
+            
+            previewImg.onerror = function() {
+                this.src = '/images/placeholders/product-placeholder.svg';
+                console.log('Erro de imagem corrigido com placeholder');
+            };
+            element.appendChild(previewImg);
+        }
+        
+        // Adicionar overlay se não existir
+        if (!element.querySelector('.overlay')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'overlay absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10';
+            overlay.innerHTML = `
+                <svg class="w-6 h-6 text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="text-white text-[10px] font-bold uppercase tracking-wider">Alterar</span>
+            `;
+            element.appendChild(overlay);
+        }
+        
+        // Adicionar evento de clique
+        element.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (fileInput) {
+                fileInput.click();
+            }
+        });
+        
+        // Adicionar evento de change
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                console.log('Arquivo selecionado:', file.name);
+                
+                // Validar arquivo
+                if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
+                    alert('Tipo de arquivo inválido. Apenas JPEG, PNG, GIF e WebP são permitidos.');
+                    return;
                 }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Arquivo muito grande. O tamanho máximo é 5MB.');
+                    return;
+                }
+                
+                // Mostrar preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+                    previewImg.src = dataUrl;
+                    element.dataset.imageChanged = 'true';
+                    element.dataset.previewData = dataUrl;
+                    console.log('Preview da imagem atualizado');
+                };
+                reader.readAsDataURL(file);
             });
         }
         
-        // Criar input de arquivo
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.name = 'image';
-        fileInput.accept = 'image/jpeg,image/jpg,image/png,image/gif,image/webp';
-        fileInput.style.display = 'none';
-        
-        if (form) {
-            // Gerar ID único para o input
-            const inputId = `image_input_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            fileInput.id = inputId;
-            element.htmlFor = inputId; // Associar label ao input
-            form.appendChild(fileInput);
-        } else {
-            element.appendChild(fileInput);
-        }
-        
-        // Adicionar imagem de preview
-        const previewImg = document.createElement('img');
-        previewImg.className = 'w-full h-full object-cover pointer-events-none';
-        previewImg.src = '/images/placeholders/product-placeholder.svg';
-        previewImg.alt = 'Preview';
-        // Prevenir erros de loading
-        previewImg.onerror = function() {
-            this.src = '/images/placeholders/product-placeholder.svg';
-            console.log('Erro de imagem corrigido com placeholder');
-        };
-        element.appendChild(previewImg);
-        
-        // Adicionar overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'absolute inset-0 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10';
-        overlay.innerHTML = `
-            <svg class="w-6 h-6 text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span class="text-white text-[10px] font-bold uppercase tracking-wider">Alterar</span>
-        `;
-        element.appendChild(overlay);
-        
-        // Remover evento de clique anterior para evitar duplicação
-        element.onclick = null;
-        
-        // Remover event listeners anteriores para evitar duplicação
-        const newElement = element.cloneNode(true);
-        element.parentNode.replaceChild(newElement, element);
-        
-        // IMPORTANTE: Obter referência da imagem do novo elemento
-        const newPreviewImg = newElement.querySelector('img');
-        
-        // Adicionar evento de clique único
-        newElement.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Clique no upload detectado!');
-            console.log('Input file name:', fileInput.name);
-            console.log('Input tem arquivo?', fileInput.files.length > 0);
-            fileInput.click();
-        }, { once: false });
-        
-        // Adicionar evento de change
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            console.log('Arquivo selecionado:', file.name);
-            
-            // Validar arquivo
-            if (!file.type.match(/image\/(jpeg|jpg|png|gif|webp)/)) {
-                alert('Tipo de arquivo inválido. Apenas JPEG, PNG, GIF e WebP são permitidos.');
-                return;
-            }
-            
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Arquivo muito grande. O tamanho máximo é 5MB.');
-                return;
-            }
-            
-            // Mostrar preview usando FileReader (data URL)
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const dataUrl = e.target.result;
-                newPreviewImg.src = dataUrl;
-                newElement.dataset.imageChanged = 'true';
-                
-                // Salvar informações do arquivo
-                newElement.dataset.imageFile = JSON.stringify({
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    hasPreview: true
-                });
-                
-                // Guardar o data URL para preview
-                newElement.dataset.previewData = dataUrl;
-                
-                console.log('Preview da imagem:', dataUrl.substring(0, 50) + '...');
-                console.log('Imagem carregada com sucesso!');
-            };
-            reader.readAsDataURL(file);
-        });
-        
-        // Suporte drag and drop
-        newElement.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            newElement.classList.add('border-blue-500', 'bg-blue-50');
-        });
-        
-        newElement.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            newElement.classList.remove('border-blue-500', 'bg-blue-50');
-        });
-        
-        newElement.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            newElement.classList.remove('border-blue-500', 'bg-blue-50');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                fileInput.dispatchEvent(new Event('change'));
-            }
-        });
-        
-        if (elementId === 'productImageUpload') {
-            window.imageUploadInstance = {
-                reset: () => {
-                    newPreviewImg.src = '/images/placeholders/product-placeholder.svg';
-                    fileInput.value = '';
-                    delete newElement.dataset.imageChanged;
-                    delete newElement.dataset.imageFile;
-                    delete newElement.dataset.previewData;
-                },
-                setImage: (url) => {
-                    // Encontrar a imagem atual dinamicamente
-                    const currentImg = element.querySelector('img');
-                    if (currentImg) {
-                        // Se for URL externa (editando produto existente)
-                        if (url && !url.startsWith('data:')) {
-                            currentImg.src = url;
-                        } else {
-                            currentImg.src = '/images/placeholders/product-placeholder.svg';
-                        }
-                    }
+        // Definir métodos públicos
+        element.imageUpload = {
+            reset: () => {
+                previewImg.src = '/images/placeholders/product-placeholder.svg';
+                if (fileInput) fileInput.value = '';
+                delete element.dataset.imageChanged;
+                delete element.dataset.previewData;
+                delete element.dataset.initialImageUrl;
+            },
+            setImage: (url) => {
+                if (url && url !== 'null' && url !== 'undefined') {
+                    // Adicionar timestamp para evitar cache
+                    const timestamp = new Date().getTime();
+                    const imageUrlWithTimestamp = `${url}?t=${timestamp}`;
+                    
+                    previewImg.src = imageUrlWithTimestamp;
+                    element.dataset.imageChanged = 'false';
+                    element.dataset.initialImageUrl = url;
+                    console.log('Imagem definida via setImage:', imageUrlWithTimestamp);
+                } else {
+                    previewImg.src = '/images/placeholders/product-placeholder.svg';
                 }
-            };
+            }
+        };
+        
+        // Também disponibilizar globalmente
+        if (elementId === 'productImageUpload') {
+            window.imageUploadInstance = element.imageUpload;
         }
         
+        element._initialized = true;
         console.log(`Upload simples inicializado com sucesso para ${elementId}`);
     }
-
     // Função para exibir erros de validação
     function displayFormErrors(errors, form) {
         // Limpar erros anteriores
@@ -988,15 +982,18 @@
         originalToggleModal(id);
         if (id === 'productModal' && !document.getElementById(id).classList.contains('hidden')) {
             setTimeout(() => {
-                interceptFormSubmit();
-                
                 // Garantir que o upload está inicializado
                 const imageUpload = document.getElementById('productImageUpload');
                 if (imageUpload && !imageUpload._initialized) {
                     initializeSimpleImageUpload('productImageUpload');
-                    imageUpload._initialized = true;
                     console.log('Upload de imagem inicializado ao abrir modal');
                 }
+                
+                // Inicializar máscaras
+                initCurrencyMasks();
+                
+                // Interceptar formulário
+                interceptFormSubmit();
             }, 100);
         }
     };
