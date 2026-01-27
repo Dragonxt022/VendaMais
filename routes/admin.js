@@ -5,7 +5,7 @@ const CompanyController = require('../controllers/admin/CompanyController');
 const auth = require('../middleware/auth');
 
 /* GET admin dashboard. */
-router.get('/', auth, async function(req, res, next) {
+router.get('/dashboard', auth, async function(req, res, next) {
   try {
     const data = await AdminController.index(req, res);
     res.render('admin/dashboard', { 

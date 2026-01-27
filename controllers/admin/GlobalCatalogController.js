@@ -30,7 +30,7 @@ module.exports = {
         where,
         limit,
         offset,
-        order: [['data_ultima_verificacao', 'DESC'], ['created_at', 'DESC']]
+        order: [['data_ultima_verificacao', 'DESC'], ['createdAt', 'DESC']]
       });
 
       return {

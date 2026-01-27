@@ -26,7 +26,7 @@ module.exports = {
       company_id: user.company_id
     };
 
-    const redirectPath = user.role === 'admin' ? '/admin' : '/app';
+    const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/app/dashboard';
     
     return { sessionUser, redirectPath };
   },

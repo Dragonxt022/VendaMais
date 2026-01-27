@@ -42,7 +42,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 /* GET user dashboard. */
-router.get('/', auth, license, async function(req, res, next) {
+router.get('/dashboard', auth, license, async function(req, res, next) {
   try {
     const data = await DashboardController.index(req, res);
     res.render('user/dashboard', { 
@@ -69,7 +69,6 @@ router.get('/products', auth, license, async function(req, res, next) {
   }
 });
 
-/* POST create product. */
 /* POST create product. */
 router.post('/products', auth, productUpload, ...productValidations.create, async function(req, res, next) {
   try {

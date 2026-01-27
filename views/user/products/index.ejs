@@ -96,20 +96,24 @@
                                          onerror="this.src='/images/placeholders/product-placeholder.svg'">
                                 </div>
                             </td>
-                            <td class="px-4 py-4 flex items-center">
-                               <button onclick="toggleFavorite('<%= product.id %>')" class="mr-2 text-xl transition-transform hover:scale-125 focus:outline-none">
-                                    <span id="fav-icon-<%= product.id %>" class="<%= product.is_favorite ? 'text-red-500' : 'text-slate-300 grayscale opacity-40 hover:opacity-100 hover:grayscale-0' %>">
-                                        <% if (product.is_favorite) { %>
-                                            <img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">
-                                        <% } else { %>
-                                            <img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">
+                            <td class="px-4 py-4">
+                                <div class="grid grid-cols-[auto,1fr] gap-x-2 items-start">
+                                    <button onclick="toggleFavorite('<%= product.id %>')" class="text-xl transition-transform hover:scale-125 focus:outline-none">
+                                        <span id="fav-icon-<%= product.id %>" class="<%= product.is_favorite ? 'text-red-500' : 'text-slate-300 grayscale opacity-40 hover:opacity-100 hover:grayscale-0' %>">
+                                            <% if (product.is_favorite) { %>
+                                                <img src="/uploads/icon/favoritos-ativo.svg" alt="Favoritado" class="w-6 h-6">
+                                            <% } else { %>
+                                                <img src="/uploads/icon/favorito-desativado.svg" alt="Favoritar" class="w-6 h-6">
+                                            <% } %>
+                                        </span>
+                                    </button>
+                                    <div class="flex flex-col">
+                                        <span class="font-medium text-slate-900"><%= product.name %></span>
+                                        <% if (product.Supplier) { %>
+                                            <span class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5"><%= product.Supplier.name %></span>
                                         <% } %>
-                                    </span>
-                                </button>
-                                <span class="font-medium text-slate-900 block"><%= product.name %></span>
-                                <% if (product.Supplier) { %>
-                                    <span class="text-[10px] text-slate-400 uppercase tracking-wider"><%= product.Supplier.name %></span>
-                                <% } %>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-6 py-4 text-slate-500 text-sm font-mono"><%= product.sku || '-' %></td>
                             <td class="px-6 py-4">
