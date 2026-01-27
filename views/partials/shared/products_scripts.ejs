@@ -354,11 +354,8 @@
         submitBtn.innerText = 'Atualizar Produto';
         form.action = `/app/products/${id}/update`;
 
-        // Reset image upload
-        const imageUpload = document.getElementById('productImageUpload');
-        if (imageUpload && window.imageUploadInstance) {
-            window.imageUploadInstance.reset();
-        }
+        // NÃO resetar imagem ao editar (apenas ao criar novo)
+        // A imagem será configurada depois com setImage()
         
         // Limpar erros anteriores
         clearFormErrors(form);
@@ -403,18 +400,29 @@
         if (form.ean) form.ean.value = dataDiv.dataset.ean || '';
 
         // Set existing image
+        const imageUpload = document.getElementById('productImageUpload');
         const imageUrl = dataDiv.dataset.imageUrl;
+        console.log('DEBUG: imageUrl =', imageUrl);
+        console.log('DEBUG: imageUpload =', imageUpload);
+        console.log('DEBUG: imageUpload.imageUpload =', imageUpload?.imageUpload);
+        console.log('DEBUG: window.imageUploadInstance =', window.imageUploadInstance);
+        
         if (imageUpload && imageUrl) {
             console.log('Configurando imagem existente:', imageUrl);
             const instance = imageUpload.imageUpload || window.imageUploadInstance;
             if (instance) {
+                console.log('Usando instância para setImage:', imageUrl);
                 instance.setImage(imageUrl);
             } else {
-                // Se não houver instância, criar manualmente
+                // Se não houver instância, configurar manualmente
                 const previewImg = imageUpload.querySelector('img');
                 if (previewImg) {
                     previewImg.src = imageUrl;
                     imageUpload.dataset.imageChanged = 'false';
+                    imageUpload.dataset.initialImageUrl = imageUrl; // Guardar para referência
+                    console.log('Imagem configurada manualmente:', imageUrl);
+                } else {
+                    console.log('PreviewImg não encontrado para configurar imagem');
                 }
             }
         }
@@ -808,11 +816,15 @@
                     delete newElement.dataset.previewData;
                 },
                 setImage: (url) => {
-                    // Se for URL externa (editando produto existente)
-                    if (url && !url.startsWith('data:')) {
-                        newPreviewImg.src = url;
-                    } else {
-                        newPreviewImg.src = '/images/placeholders/product-placeholder.svg';
+                    // Encontrar a imagem atual dinamicamente
+                    const currentImg = element.querySelector('img');
+                    if (currentImg) {
+                        // Se for URL externa (editando produto existente)
+                        if (url && !url.startsWith('data:')) {
+                            currentImg.src = url;
+                        } else {
+                            currentImg.src = '/images/placeholders/product-placeholder.svg';
+                        }
                     }
                 }
             };
