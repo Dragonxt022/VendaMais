@@ -3,4 +3,6 @@ node_modules
 node_modules/
 coverage/
 src/public/uploads/
+src/database/*.sqlite
+coverage/
 *.log

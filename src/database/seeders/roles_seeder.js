@@ -1,4 +1,4 @@
-const { User, Company, sequelize } = require('../src/models');
+const { User, Company, sequelize } = require('../../models');
 const bcrypt = require('bcryptjs');
 
 async function seed() {

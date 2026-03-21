@@ -10,54 +10,66 @@ require('dotenv').config();
 
 const env = process.env.NODE_ENV || 'development';
 const db = {};
+const databaseDir = path.join(process.cwd(), 'src', 'database');
 
 const defaultsByEnv = {
   development: {
-    database: 'vendamais',
-    username: 'root',
-    password: 'rootpassword',
-    host: 'localhost',
-    port: 3306,
-    dialect: 'mysql'
+    dialect: 'sqlite',
+    storage: path.join(databaseDir, 'development.sqlite')
   },
   test: {
-    database: 'vendamais_test',
-    username: 'root',
-    password: 'rootpassword',
-    host: 'localhost',
-    port: 3306,
-    dialect: 'mysql'
+    dialect: 'sqlite',
+    storage: path.join(databaseDir, 'test.sqlite')
   },
   production: {
+    dialect: 'mysql',
     database: 'vendamais',
     username: 'root',
     password: 'rootpassword',
     host: 'localhost',
-    port: 3306,
-    dialect: 'mysql'
+    port: 3306
   }
 };
 
 const defaults = defaultsByEnv[env] || defaultsByEnv.development;
-const dbName = process.env.DB_NAME || defaults.database;
-const dbUser = process.env.DB_USER || defaults.username;
-const dbPass = process.env.DB_PASSWORD || defaults.password;
-const dbHost = process.env.DB_HOST || defaults.host;
-const dbPort = Number(process.env.DB_PORT || defaults.port);
-const dbDialect = process.env.DB_DIALECT || defaults.dialect;
+const dbDialect = (process.env.DB_DIALECT || defaults.dialect).toLowerCase();
 
-console.log(`[Database] Tentando conectar como '${dbUser}' em '${dbHost}:${dbPort}' no banco '${dbName}'...`);
-console.log(`[Database] Usando variaveis individuais para conexao (${env})...`);
+let sequelize;
 
-const sequelize = new Sequelize(dbName, dbUser, dbPass, {
-  host: dbHost,
-  port: dbPort,
-  dialect: dbDialect,
-  logging: env === 'development' ? console.log : false,
-  define: {
-    timestamps: true
-  }
-});
+if (dbDialect === 'sqlite') {
+  const dbStorage = process.env.DB_STORAGE || defaults.storage;
+  fs.mkdirSync(path.dirname(dbStorage), { recursive: true });
+
+  console.log(`[Database] Usando SQLite em '${dbStorage}' (${env})...`);
+
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: dbStorage,
+    logging: env === 'development' ? console.log : false,
+    define: {
+      timestamps: true
+    }
+  });
+} else {
+  const dbName = process.env.DB_NAME || defaults.database;
+  const dbUser = process.env.DB_USER || defaults.username;
+  const dbPass = process.env.DB_PASSWORD || defaults.password;
+  const dbHost = process.env.DB_HOST || defaults.host;
+  const dbPort = Number(process.env.DB_PORT || defaults.port);
+
+  console.log(`[Database] Tentando conectar como '${dbUser}' em '${dbHost}:${dbPort}' no banco '${dbName}'...`);
+  console.log(`[Database] Usando ${dbDialect} com variaveis individuais (${env})...`);
+
+  sequelize = new Sequelize(dbName, dbUser, dbPass, {
+    host: dbHost,
+    port: dbPort,
+    dialect: dbDialect,
+    logging: env === 'development' ? console.log : false,
+    define: {
+      timestamps: true
+    }
+  });
+}
 
 fs
   .readdirSync(__dirname)

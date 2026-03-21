@@ -12,7 +12,7 @@
     "backup": "git add . && node -e \"const d=new Date(); const s=d.getDate().toString().padStart(2,'0')+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getFullYear()+'_'+d.getHours().toString().padStart(2,'0')+'-'+d.getMinutes().toString().padStart(2,'0')+'-'+d.getSeconds().toString().padStart(2,'0'); require('child_process').execSync('git commit -m \\\"backup ' + s + '\\\"', {stdio: 'inherit'})\"",
     "reset": "git reset --soft HEAD~1",
     "test": "jest --runInBand",
-    "db:seed": "node seeders/product_seeder.js",
+    "db:seed": "node src/database/seeders/product_seeder.js",
     "pm2:start": "pm2 start ecosystem.config.js",
     "db:reset": "node scripts/db-reset.js"
   },
@@ -27,14 +27,14 @@
     "ejs": "^3.1.10",
     "express": "^4.22.1",
     "express-ejs-layouts": "^2.5.1",
-    "express-mysql-session": "^3.0.3",
     "express-session": "^1.18.2",
     "express-validator": "^7.3.1",
     "http-errors": "~1.6.3",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "mysql2": "^3.16.0",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "sqlite3": "^6.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.23",
