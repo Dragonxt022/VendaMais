@@ -1,4 +1,4 @@
-const { Product, Category, Supplier, Company } = require('../models');
+const { Product, Category, Supplier, Company } = require('../src/models');
 
 async function seed() {
   try {

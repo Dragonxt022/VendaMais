@@ -10,7 +10,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database/init:/docker-entrypoint-initdb.d
+      - ./src/database/init:/docker-entrypoint-initdb.d
     networks:
       - vendamais-network
     restart: unless-stopped

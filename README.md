@@ -1,127 +1,164 @@
 # VendaMais
 
-VendaMais é uma aplicação web voltada para **gestão comercial**, focada no setor gastronômico e licenciada sob a **GPL-3.0**. 🎉
+Aplicacao web de gestao comercial com Node.js, Express, EJS, Sequelize e MySQL.
 
-O projeto utiliza um **Ambiente Híbrido** de desenvolvimento: o banco de dados roda em Docker, enquanto a aplicação Node.js roda diretamente no host Windows/Linux para maior agilidade, gerenciada pelo **PM2**.
+## Visao Geral
 
----
+- O codigo da aplicacao fica em `src/`.
+- A estrutura publica e de banco tambem foi internalizada em `src`.
+- A configuracao de ambiente usa apenas `.env` e `.env.example`.
+- O ambiente ativo e controlado por `NODE_ENV` dentro do `.env`.
 
-## 📸 Demonstração do Sistema
+## Estrutura
 
-<div align="center">
-  <img src="imagem_projeto/01.png" alt="Dashboard Principal" width="850px">
-  <p><i>Painel Geral de Indicadores</i></p>
-  <br>
-  <img src="imagem_projeto/02.png" alt="Gestão de Produtos" width="400px">
-  <img src="imagem_projeto/03.png" alt="Controle de Estoque" width="400px">
-</div>
+```text
+vendamais/
+├── src/
+│   ├── bin/
+│   ├── controllers/
+│   ├── database/
+│   │   ├── init/
+│   │   └── migrations/
+│   ├── middleware/
+│   ├── models/
+│   ├── public/
+│   │   ├── images/
+│   │   ├── javascripts/
+│   │   ├── stylesheets/
+│   │   └── uploads/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── views/
+│   ├── app.js
+│   └── server.js
+├── scripts/
+├── seeders/
+├── tests/
+├── docker-compose.yml
+└── ecosystem.config.js
+```
 
----
+## Pre-requisitos
 
-## 🚀 Instalação e Execução (Ambiente Híbrido)
+- Node.js 18+
+- Docker Desktop
+- PM2 opcional para executar em background
 
-### 1. Pré-requisitos
-- **Docker Desktop** (para o Banco de Dados)
-- **Node.js 18+**
-- **PM2** (`npm install -g pm2`)
+## Configuracao
 
-### 2. Configuração Inicial
+1. Instale as dependencias:
+
 ```powershell
-# Clone o repositório
-git clone https://github.com/Dragonxt022/vendamais.git
-cd vendamais
-
-# Configure as variáveis de ambiente (use localhost para o DB_HOST)
-copy .env.example .env
-
-# Instale as dependências
 npm install
 ```
 
-### 3. Subir o Banco de Dados (Docker)
-Certifique-se de que o Docker Desktop está aberto e rodando.
+2. Crie o arquivo de ambiente:
+
+```powershell
+copy .env.example .env
+```
+
+3. Ajuste o `.env` conforme o ambiente desejado:
+
+```env
+NODE_ENV=development
+SECRET=uma_chave_secreta_e_segura_aqui
+SESSION_DURATION_HOURS=8
+
+DB_DIALECT=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=vendamais
+DB_USER=root
+DB_PASSWORD=rootpassword
+```
+
+Se quiser rodar em producao, altere o `NODE_ENV` e os dados de conexao no proprio `.env`.
+
+## Banco de Dados
+
+Suba o MySQL com Docker:
+
 ```powershell
 docker-compose up -d
 ```
-*Isso iniciará o MySQL (porta 3306) e o phpMyAdmin (porta 8080).*
 
-### 4. Preparar o Banco e Assets
+O container usa os arquivos de inicializacao em `src/database/init`.
+
+As migracoes historicas ficam em `src/database/migrations`.
+
+Resete o banco e recrie os dados base:
+
 ```powershell
-# Resetar e criar tabelas com dados iniciais
 npm run db:reset
+```
 
-# Se quiser gerar 1000 produtos de teste
+Usuarios iniciais criados no reset:
+
+- `admin@vendamais.com / admin123`
+- `gerente@teste.com / teste123`
+
+Seeder opcional de produtos:
+
+```powershell
 npm run db:seed
+```
 
-# Compilar o CSS (Tailwind)
+## Executando a Aplicacao
+
+Desenvolvimento:
+
+```powershell
+npm run dev
+```
+
+Build do CSS:
+
+```powershell
 npm run tailwind:build
 ```
 
-### 5. Iniciar a Aplicação (PM2)
+Execucao normal:
+
+```powershell
+npm start
+```
+
+Execucao com PM2:
+
 ```powershell
 npm run pm2:start
 ```
 
----
+## Arquivos Publicos
 
-## 🛠️ Comandos Úteis
+- Os arquivos estaticos ficam em `src/public`.
+- Os uploads ficam em `src/public/uploads`.
+- Os icones fixos da interface ficam em `src/public/uploads/icon`.
+- Avatares e imagens de produtos usam `src/public/uploads/avatars` e `src/public/uploads/products`.
 
-| Comando | Descrição |
-|---------|-----------|
-| `npm run dev` | Inicia servidor watch + Tailwind watch |
-| `npm run tailwind:build` | Compila o CSS final |
-| `npm run db:reset` | **Limpa o banco** e recria usuários base |
-| `npm run db:seed` | Gera 1000 produtos de teste |
-| `pm2 logs vendamais` | Visualiza os logs em tempo real |
-| `pm2 monit` | Painel de monitoramento do PM2 |
-| `docker-compose down` | Para o banco de dados |
+Quando for preciso limpar uploads temporarios, remova apenas `avatars` e `products`. Os itens de `icon` devem ser preservados.
 
----
+## Comandos Uteis
 
-## 📁 Estrutura do Projeto
+- `npm run dev`: servidor em watch + Tailwind em watch
+- `npm start`: sobe a aplicacao usando `src/server.js`
+- `npm run tailwind:build`: recompila o CSS em `src/public/stylesheets/style.css`
+- `npm run db:reset`: recria o banco com dados iniciais
+- `npm run db:seed`: popula produtos de teste
+- `npm test`: roda a suite de testes
 
-```
-vendamais/
-├── controllers/    # Lógica por contexto (Admin, User, Site)
-├── models/         # Modelos Sequelize (MySQL)
-├── routes/         # Definição de rotas
-├── views/          # Telas EJS com Tailwind CSS
-├── public/         # Arquivos estáticos e CSS compilado
-├── database/       # Scripts e inicialização do BD
-├── scripts/        # Utilitários (reset, seed, sync)
-├── ecosystem.config.js # Configuração do PM2
-└── docker-compose.yml  # Configuração do MySQL/phpMyAdmin
-```
+## Observacoes
 
----
+- O projeto depende de um MySQL acessivel nas configuracoes do `.env`.
+- O reset do banco nao remove os icones de `src/public/uploads/icon`.
+- A raiz agora fica reservada para arquivos de orquestracao e suporte do projeto.
 
-## 🔐 Configuração do .env (Sugestão)
-```env
-# Banco de Dados
-DB_HOST=localhost
-DB_NAME=vendamais
-DB_USER=root
-DB_PASSWORD=rootpassword
-DB_PORT=3306
-DB_DIALECT=mysql
-```
+## Contribuicao
 
----
+Veja [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## ✅ Status do Projeto
-- [x] Docker configurado para MySQL/phpMyAdmin
-- [x] Node.js rodando fora do Docker com PM2
-- [x] Scripts de Reset e Seed automatizados
-- [x] Layout Responsivo com Tailwind CSS
-- [x] Validações de Produto e Categoria corrigidas
+## Licenca
 
----
-
-## 🤝 Contribuição
-Consulte o [Guia de Contribuição](CONTRIBUTING.md) e sinta-se à vontade para abrir Issues ou Pull Requests.
-
-## 📄 Licença
-Este projeto está licenciado sob a **GPL-3.0**. Veja o arquivo [LICENSE](LICENSE).
-
----
-🟢 **Ambiente Híbrido Configurado e Pronto para Uso!**
+Este projeto esta licenciado sob a GPL-3.0. Veja [LICENSE](LICENSE).

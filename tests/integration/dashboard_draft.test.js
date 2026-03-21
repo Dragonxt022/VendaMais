@@ -1,6 +1,6 @@
 const request = require('supertest');
-const app = require('../../app');
-const { User, Company, Product, sequelize } = require('../../models');
+const app = require('../../src/app');
+const { User, Company, Product, sequelize } = require('../../src/models');
 const bcrypt = require('bcryptjs');
 
 describe('Dashboard Integration', () => {

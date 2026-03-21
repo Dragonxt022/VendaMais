@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../app');
+const app = require('../../src/app');
 
 describe('Auth Routes', () => {
   it('GET /login should respond with 200 OK', async () => {

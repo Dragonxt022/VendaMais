@@ -1,4 +1,4 @@
-const { sequelize, Company, User, Category, Supplier } = require('../models');
+const { sequelize, Company, User, Category, Supplier } = require('../src/models');
 const bcrypt = require('bcryptjs');
 
 async function reset() {

@@ -1,0 +1,31 @@
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 text-white p-6 md:p-8 rounded-3xl mb-8 gap-4">
+    <div>
+        <h1 class="text-2xl font-bold">Painel de Controle Admin</h1>
+        <p class="text-slate-400 text-sm mt-1">Gerenciamento global da plataforma VendaMais</p>
+    </div>
+    <div class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-bold border border-green-500/30">
+        Status: <%= overview.systemHeat %>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-2xl border border-slate-200">
+        <h3 class="text-slate-400 text-sm font-medium mb-4">Total de Restaurantes</h3>
+        <div class="text-4xl font-bold text-slate-900"><%= overview.totalUsers %></div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl border border-slate-200">
+        <h3 class="text-slate-400 text-sm font-medium mb-4">Novas Contas (24h)</h3>
+        <div class="text-4xl font-bold text-food-orange">18</div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl border border-slate-200">
+        <h3 class="text-slate-400 text-sm font-medium mb-4">Assinaturas Ativas</h3>
+        <div class="text-4xl font-bold text-orange-800">92%</div>
+    </div>
+</div>
+
+<div class="mt-8 flex flex-col sm:flex-row gap-4">
+    <a href="/" class="bg-slate-200 text-slate-700 px-6 py-2 rounded-lg font-bold hover:bg-slate-300 transition-colors text-sm text-center">Ver Site</a>
+    <button class="bg-food-orange text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600 transition-colors text-sm shadow-lg shadow-orange-500/20">Configurações do Sistema</button>
+</div>

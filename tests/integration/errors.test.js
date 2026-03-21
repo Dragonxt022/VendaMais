@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../app');
+const app = require('../../src/app');
 
 describe('Error Handling Integration', () => {
     it('GET /non-existent-page should return 404', async () => {
@@ -12,7 +12,7 @@ describe('Error Handling Integration', () => {
         // We can simulate an error by triggering a route that doesn't exist or forcing an error in a route
         // but since we want to test the app.js error handler, we can mock a route that throws
         const express = require('express');
-        const testApp = require('../../app');
+        const testApp = require('../../src/app');
         
         // Add a temporary route specifically for this test if needed, 
         // but we'll try to use what we have.

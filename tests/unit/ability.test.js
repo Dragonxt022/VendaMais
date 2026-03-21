@@ -1,4 +1,4 @@
-const { defineAbilitiesFor } = require('../../utils/ability');
+const { defineAbilitiesFor } = require('../../src/utils/ability');
 const { subject } = require('@casl/ability');
 
 describe('CASL Abilities', () => {
