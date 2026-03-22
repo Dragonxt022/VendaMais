@@ -1,46 +1,96 @@
-<div class="mb-10">
-    <h1 class="text-3xl font-bold text-slate-900">Olá, bem-vindo de volta! 👋</h1>
-    <p class="text-slate-500 mt-1">Aqui está o resumo do seu negócio gastronômico hoje.</p>
-</div>
+<section class="mb-10">
+    <h1 class="text-3xl font-bold text-slate-900">Ola, bem-vindo de volta!</h1>
+    <p class="mt-1 text-slate-500">Aqui esta o resumo do seu negocio hoje.</p>
+</section>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-food-orange">
-        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Produtos Ativos</div>
+<section class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
+    <div class="rounded-2xl border border-slate-100 border-l-4 border-l-food-orange bg-white p-6 shadow-sm">
+        <div class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Produtos Ativos</div>
         <div class="text-3xl font-bold text-slate-900"><%= stats.activeProducts %></div>
-        <div class="mt-2 text-xs text-slate-500 font-semibold">no catálogo</div>
     </div>
-    
-    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-orange-800">
-        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Valor em Estoque</div>
+
+    <div class="rounded-2xl border border-slate-100 border-l-4 border-l-orange-800 bg-white p-6 shadow-sm">
+        <div class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Valor em Estoque</div>
         <div class="text-3xl font-bold text-slate-900">R$ <%= stats.inventoryValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></div>
-        <div class="mt-2 text-xs text-slate-500 font-semibold">custo total</div>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-red-500">
-        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Estoque Baixo</div>
-        <div class="text-3xl font-bold text-slate-900 text-red-600"><%= stats.lowStockProducts %></div>
-        <div class="mt-2 text-xs text-red-500 font-semibold">precisam de reposição</div>
+    <div class="rounded-2xl border border-slate-100 border-l-4 border-l-red-500 bg-white p-6 shadow-sm">
+        <div class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Estoque Baixo</div>
+        <div class="text-3xl font-bold text-red-600"><%= stats.lowStockProducts %></div>
     </div>
 
-    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Itens no Estoque</div>
-        <div class="text-3xl font-bold text-slate-900 text-orange-950"><%= stats.totalItems %></div>
-        <div class="mt-2 text-xs text-slate-500 font-semibold">unidades totais</div>
+    <div class="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+        <div class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Itens no Estoque</div>
+        <div class="text-3xl font-bold text-slate-900"><%= stats.totalItems %></div>
     </div>
-</div>
 
-<div class="mt-10 bg-white rounded-3xl border border-slate-100 p-8">
-    <h3 class="text-xl font-bold text-slate-900 mb-6">Atividades Recentes</h3>
-    <div class="space-y-4">
-        <!-- Placeholder para atividades -->
-        <div class="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0 text-slate-600">
-            <div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-food-orange">
-                🛒
-            </div>
-            <div>
-                <p class="font-medium">Novo pedido recebido #4582</p>
-                <p class="text-xs text-slate-400">Há 5 minutos</p>
-            </div>
+    <div class="rounded-2xl border border-slate-100 border-l-4 border-l-amber-500 bg-white p-6 shadow-sm">
+        <div class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Contas a Vencer</div>
+        <div class="text-3xl font-bold text-amber-600"><%= stats.upcomingAccounts %></div>
+    </div>
+</section>
+
+<section class="mt-10 rounded-3xl border border-slate-100 bg-white p-8">
+    <div class="flex items-center justify-between">
+        <h3 class="text-xl font-bold text-slate-900">Atalhos rapidos</h3>
+    </div>
+    <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <% quickLinks.forEach(link => { %>
+            <a href="<%= link.href %>" class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-700 transition-all hover:border-orange-200 hover:bg-orange-50 hover:text-food-orange">
+                <%= link.label %>
+            </a>
+        <% }) %>
+    </div>
+</section>
+
+<section class="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <article class="rounded-3xl border border-slate-100 bg-white p-8">
+        <div class="flex items-center justify-between">
+            <h3 class="text-xl font-bold text-slate-900">Mural de contas a vencer</h3>
+            <a href="/app/accounts" class="text-sm font-semibold text-food-orange hover:underline">Ver contas</a>
         </div>
-    </div>
-</div>
+        <div class="mt-6 space-y-4">
+            <% if (notices.upcomingAccounts.length > 0) { %>
+                <% notices.upcomingAccounts.forEach(account => { %>
+                    <div class="flex items-center justify-between rounded-2xl border border-amber-100 bg-amber-50 px-4 py-4">
+                        <div>
+                            <p class="font-semibold text-slate-900"><%= account.name %></p>
+                            <p class="text-sm text-slate-500">
+                                <%= account.AccountCategory ? account.AccountCategory.name + ' • ' : '' %>Vence em <%= new Date(account.due_date).toLocaleDateString('pt-BR') %>
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-amber-700">R$ <%= Number(account.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></p>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-sm text-slate-500">Nenhuma conta a vencer nos proximos dias.</p>
+            <% } %>
+        </div>
+    </article>
+
+    <article class="rounded-3xl border border-slate-100 bg-white p-8">
+        <div class="flex items-center justify-between">
+            <h3 class="text-xl font-bold text-slate-900">Produtos com estoque baixo</h3>
+            <a href="/app/products" class="text-sm font-semibold text-food-orange hover:underline">Ver produtos</a>
+        </div>
+        <div class="mt-6 space-y-4">
+            <% if (notices.lowStockItems.length > 0) { %>
+                <% notices.lowStockItems.forEach(product => { %>
+                    <div class="flex items-center justify-between rounded-2xl border border-red-100 bg-red-50 px-4 py-4">
+                        <div>
+                            <p class="font-semibold text-slate-900"><%= product.name %></p>
+                            <p class="text-sm text-slate-500">Minimo: <%= product.min_stock %> • Atual: <%= product.stock_quantity %></p>
+                        </div>
+                        <div class="text-right text-sm font-bold text-red-600">
+                            Repor
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-sm text-slate-500">Nenhum produto gerenciavel com estoque baixo no momento.</p>
+            <% } %>
+        </div>
+    </article>
+</section>

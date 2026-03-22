@@ -87,6 +87,14 @@ Resetar banco local:
 npm run db:reset
 ```
 
+Aplicar evolucoes de estrutura sem apagar dados:
+
+```powershell
+npm run db:migrate:safe
+```
+
+Esse comando e idempotente. Ele cria tabelas e colunas novas que estiverem faltando e faz os ajustes de compatibilidade sem resetar o banco atual.
+
 ### Producao
 
 Na producao, configure `NODE_ENV=production` e `DB_DIALECT=mysql`.
@@ -135,6 +143,7 @@ A porta da aplicacao e controlada por `PORT` no `.env`.
 - `npm start`: sobe a aplicacao usando `src/server.js`
 - `npm run tailwind:build`: recompila o CSS em `src/public/stylesheets/style.css`
 - `npm run db:reset`: recria o banco com dados iniciais
+- `npm run db:migrate:safe`: aplica evolucoes seguras no banco sem apagar dados
 - `npm run db:seed`: executa os seeders em `src/database/seeders`
 - `npm test`: roda a suite de testes
 

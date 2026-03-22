@@ -1,0 +1,68 @@
+<section class="mb-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900">Gestao de Gastos</h1>
+        <p class="mt-2 text-slate-500">Controle suas contas, boletos e compromissos financeiros em um unico lugar.</p>
+    </div>
+    <a href="/app/accounts/new" class="inline-flex items-center justify-center rounded-xl bg-food-orange px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200/60 transition-colors hover:bg-orange-600">
+        Nova Conta
+    </a>
+</section>
+
+<section class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[860px] text-left">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Conta</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Categoria</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Valor</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Emitida</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Vencimento</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Anexo</th>
+                    <th class="px-6 py-4 text-right text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Acoes</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <% if (accounts.length > 0) { %>
+                    <% accounts.forEach(account => { %>
+                        <tr class="transition-colors hover:bg-orange-50/40">
+                            <td class="px-6 py-5">
+                                <p class="font-semibold text-slate-900"><%= account.name %></p>
+                                <p class="mt-1 text-sm text-slate-500"><%= account.notes ? account.notes : 'Sem informacoes adicionais' %></p>
+                            </td>
+                            <td class="px-6 py-5">
+                                <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold" style="background-color: <%= (account.AccountCategory && account.AccountCategory.color ? account.AccountCategory.color : '#94a3b8') + '20' %>; color: <%= account.AccountCategory && account.AccountCategory.color ? account.AccountCategory.color : '#64748b' %>;">
+                                    <span class="h-2 w-2 rounded-full" style="background-color: <%= account.AccountCategory && account.AccountCategory.color ? account.AccountCategory.color : '#64748b' %>"></span>
+                                    <%= account.AccountCategory ? account.AccountCategory.name : account.name %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-5 font-semibold text-slate-900">R$ <%= Number(account.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></td>
+                            <td class="px-6 py-5 text-slate-500"><%= new Date(account.issued_at).toLocaleDateString('pt-BR') %></td>
+                            <td class="px-6 py-5">
+                                <span class="rounded-full px-3 py-1 text-xs font-bold <%= account.isOverdue ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700' %>">
+                                    <%= new Date(account.due_date).toLocaleDateString('pt-BR') %>
+                                </span>
+                            </td>
+                            <td class="px-6 py-5">
+                                <% if (account.attachment_url) { %>
+                                    <a href="<%= account.attachment_url %>" target="_blank" class="text-sm font-semibold text-food-orange hover:underline">Abrir arquivo</a>
+                                <% } else { %>
+                                    <span class="text-sm text-slate-400">Sem anexo</span>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <a href="/app/accounts/<%= account.id %>/edit" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-food-orange">
+                                    Editar
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="7" class="px-6 py-16 text-center text-slate-500">Nenhuma conta cadastrada ainda. A categoria padrao sugerida e "Outro".</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</section>

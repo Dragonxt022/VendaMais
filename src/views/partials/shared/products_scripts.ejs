@@ -304,6 +304,7 @@
         const selected = Array.from(document.getElementsByName('productSelect')).filter(cb => cb.checked);
         document.getElementById('bulkSelectedCount').innerText = `${selected.length} produtos selecionados para reajuste`;
         setAdjustType('price');
+        syncBulkAdjustInputMode();
         toggleModal('bulkAdjustModal');
     }
 
@@ -312,6 +313,40 @@
         document.querySelectorAll('.adjust-type-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.type === type);
         });
+        syncBulkAdjustInputMode();
+    }
+
+    function syncBulkAdjustInputMode() {
+        const input = document.getElementById('adjustValue');
+        const hint = document.getElementById('adjustValueHint');
+        const modeField = document.querySelector('input[name="adjustMode"]:checked');
+        const mode = modeField ? modeField.value : 'percentage';
+        const isCurrencyMode = mode === 'fixed' && selectedAdjustType !== 'stock';
+
+        if (!input) return;
+
+        input.value = '';
+        input.classList.remove('js-currency-input');
+
+        if (isCurrencyMode) {
+            input.classList.add('js-currency-input');
+            input.placeholder = 'Ex: 12,50';
+            if (hint) {
+                hint.innerText = 'Use valor monetario em reais. Exemplo: 12,50 ou 1.234,56.';
+            }
+
+            if (window.VendaMaisCurrency) {
+                window.VendaMaisCurrency.bindInputs('#adjustValue');
+            }
+            return;
+        }
+
+        input.placeholder = selectedAdjustType === 'stock' ? 'Ex: 10 ou -5' : 'Ex: 10 ou -5';
+        if (hint) {
+            hint.innerText = mode === 'percentage'
+                ? 'Use valores positivos para aumentar e negativos para diminuir em porcentagem.'
+                : 'Use valores positivos para aumentar e negativos para diminuir.';
+        }
     }
 
     async function submitBulkAdjust() {
@@ -319,7 +354,8 @@
             .filter(cb => cb.checked)
             .map(cb => cb.value);
             
-        const value = document.getElementById('adjustValue').value;
+        const input = document.getElementById('adjustValue');
+        const value = input.value;
         const mode = document.querySelector('input[name="adjustMode"]:checked').value;
         
         if (!value) return window.notify('Informe um valor para o reajuste', 'warning');
@@ -341,6 +377,10 @@
     }
 
     // --- Adaptations for Existing Modals ---
+    document.querySelectorAll('input[name="adjustMode"]').forEach(input => {
+        input.addEventListener('change', syncBulkAdjustInputMode);
+    });
+
     function prepareEditModal(id) {
         const dataDiv = document.getElementById(`product-data-${id}`);
         if (!dataDiv) return;

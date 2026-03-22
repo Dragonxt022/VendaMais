@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDV Pro - Gestão de Comandas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --orange-primary: #F97316;
+            --orange-soft: #FFEDD5;
+            --orange-dark: #C2410C;
+        }
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .orange-gradient {
+            background: linear-gradient(135deg, var(--orange-primary), var(--orange-dark));
+        }
+        .card-comanda:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--orange-primary);
+            border-radius: 10px;
+        }
+        .shortcut-badge {
+            font-size: 0.65rem;
+            padding: 1px 4px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: #fff;
+            color: #64748b;
+            margin-left: 4px;
+        }
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        .product-image {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 orange-gradient rounded-lg flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                P
+            </div>
+            <div>
+                <h1 class="font-bold text-gray-800 leading-none">PDV Master</h1>
+                <p class="text-xs text-gray-500">Operador: Administrador</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-6">
+            <div class="hidden md:flex items-center gap-3 text-sm text-gray-600">
+                <span><span class="shortcut-badge">F1</span> Comandas</span>
+                <span><span class="shortcut-badge">F2</span> Nova Venda</span>
+                <span><span class="shortcut-badge">F10</span> Fechar Caixa</span>
+            </div>
+            <div id="clock" class="font-mono text-orange-700 font-semibold bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+                00:00:00
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex overflow-hidden p-4 gap-4" id="app-container">
+        
+        <!-- Vista 1: Listagem de Comandas -->
+        <section id="view-comandas" class="w-full flex flex-col gap-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Comandas Ativas</h2>
+                <button onclick="novaComanda()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md">
+                    <i class="fas fa-plus"></i> Abrir Comanda <span class="shortcut-badge bg-orange-800 text-white border-none">N</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 overflow-y-auto custom-scrollbar pr-2" id="grid-comandas">
+                <!-- Cards Gerados por JS -->
+            </div>
+        </section>
+
+        <!-- Vista 2: Tela de Venda -->
+        <section id="view-venda" class="hidden w-full flex gap-4 overflow-hidden">
+            <!-- Coluna Esquerda: Categorias e Itens -->
+            <div class="flex-1 flex flex-col gap-4 overflow-hidden">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-2 overflow-x-auto no-scrollbar">
+                    <button onclick="filtrarProdutos('Tudo')" class="category-btn bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Tudo</button>
+                    <button onclick="filtrarProdutos('Açaí')" class="category-btn bg-gray-100 text-gray-600 hover:bg-orange-50 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Açaí</button>
+                    <button onclick="filtrarProdutos('Bebidas')" class="category-btn bg-gray-100 text-gray-600 hover:bg-orange-50 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Bebidas</button>
+                    <button onclick="filtrarProdutos('Lanches')" class="category-btn bg-gray-100 text-gray-600 hover:bg-orange-50 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Lanches</button>
+                    <button onclick="filtrarProdutos('Sobremesas')" class="category-btn bg-gray-100 text-gray-600 hover:bg-orange-50 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Sobremesas</button>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 overflow-y-auto custom-scrollbar p-1" id="grid-produtos">
+                    <!-- Produtos -->
+                </div>
+            </div>
+
+            <!-- Coluna Direita: Carrinho e Checkout -->
+            <div class="w-96 bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col overflow-hidden">
+                <div class="p-4 bg-orange-50 border-b border-orange-100 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-orange-900" id="venda-titulo">Comanda #05</h3>
+                        <p class="text-xs text-orange-700">Iniciada às 14:20</p>
+                    </div>
+                    <button onclick="voltarParaComandas()" class="text-gray-400 hover:text-orange-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar" id="lista-carrinho">
+                    <!-- Itens do Carrinho -->
+                </div>
+
+                <div class="p-4 bg-gray-50 border-t border-gray-200 gap-3 flex flex-col">
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>Subtotal</span>
+                        <span id="subtotal">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <div class="flex items-center gap-1">
+                            <span>Desconto</span>
+                            <button onclick="abrirModalDesconto()" class="text-orange-600 hover:underline"><span class="shortcut-badge">D</span></button>
+                        </div>
+                        <span class="text-red-500" id="desconto">- R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-gray-800 pt-2 border-t border-gray-200">
+                        <span>Total</span>
+                        <span class="text-orange-600" id="total">R$ 0,00</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <button onclick="abrirModalPagamento()" class="col-span-2 orange-gradient text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                            <i class="fas fa-cash-register"></i> FINALIZAR <span class="text-xs opacity-70">(F5)</span>
+                        </button>
+                        <button onclick="abrirModalDivisao()" class="bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300 transition-all">
+                            Dividir Conta
+                        </button>
+                        <button onclick="voltarParaComandas()" class="bg-gray-100 text-gray-600 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-all">
+                            Suspender
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Condicionais (Açaí) -->
+    <div id="modal-condicional" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="p-6 orange-gradient text-white">
+                <h3 class="text-xl font-bold">Personalizar Item</h3>
+                <p class="text-orange-100 text-sm">Escolha seus complementos abaixo</p>
+            </div>
+            <div class="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar" id="opcoes-condicionais">
+                <!-- Renderizado via JS -->
+            </div>
+            <div class="p-6 bg-gray-50 flex justify-between items-center border-t border-gray-200">
+                <div class="text-sm font-medium text-gray-500">Adicionais: <span class="text-orange-600" id="total-adicionais">R$ 0,00</span></div>
+                <div class="flex gap-3">
+                    <button onclick="fecharModalCondicional()" class="px-4 py-2 text-gray-500 hover:bg-gray-200 rounded-lg font-semibold">Cancelar</button>
+                    <button onclick="confirmarAdicionais()" class="px-6 py-2 orange-gradient text-white rounded-lg font-bold shadow-md">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento -->
+    <div id="modal-pagamento" class="modal-overlay fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl flex overflow-hidden">
+            <!-- Esquerda: Detalhes -->
+            <div class="w-1/2 p-8 border-r border-gray-100">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6">Finalizar Venda</h3>
+                <div class="space-y-4">
+                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+                        <span class="text-sm text-orange-800 block">Total a Pagar</span>
+                        <span class="text-3xl font-black text-orange-600" id="pag-total-display">R$ 0,00</span>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-xl border border-green-100">
+                        <span class="text-sm text-green-800 block">Valor Recebido</span>
+                        <span class="text-2xl font-bold text-green-600" id="pag-recebido-display">R$ 0,00</span>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <span class="text-sm text-gray-600 block">Troco</span>
+                        <span class="text-2xl font-bold text-gray-800" id="pag-troco-display">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Direita: Formas de Pagamento -->
+            <div class="w-1/2 p-8 bg-gray-50">
+                <h4 class="font-bold text-gray-700 mb-4">Forma de Pagamento</h4>
+                <div class="grid grid-cols-1 gap-3 mb-6">
+                    <button onclick="adicionarPagamento('Dinheiro')" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-orange-400 transition-all group">
+                        <span class="font-medium text-gray-700"><i class="fas fa-money-bill-wave text-green-500 mr-2"></i> Dinheiro</span>
+                        <span class="shortcut-badge group-hover:bg-orange-100">1</span>
+                    </button>
+                    <button onclick="adicionarPagamento('Cartão Crédito')" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-orange-400 transition-all group">
+                        <span class="font-medium text-gray-700"><i class="fas fa-credit-card text-blue-500 mr-2"></i> Cartão Crédito</span>
+                        <span class="shortcut-badge group-hover:bg-orange-100">2</span>
+                    </button>
+                    <button onclick="adicionarPagamento('PIX')" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-orange-400 transition-all group">
+                        <span class="font-medium text-gray-700"><i class="fas fa-qrcode text-teal-500 mr-2"></i> PIX</span>
+                        <span class="shortcut-badge group-hover:bg-orange-100">3</span>
+                    </button>
+                </div>
+                
+                <div id="lista-pagamentos" class="mb-4 max-h-32 overflow-y-auto space-y-2">
+                    <!-- Listagem de multiplas formas de pag -->
+                </div>
+
+                <button onclick="finalizarTudo()" class="w-full orange-gradient text-white py-4 rounded-xl font-bold text-lg shadow-xl hover:opacity-90 transition-all">
+                    CONCLUIR VENDA <i class="fas fa-check-circle ml-2"></i>
+                </button>
+                <button onclick="fecharModalPagamento()" class="w-full mt-3 text-gray-500 text-sm font-medium">Voltar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification" class="fixed bottom-6 right-6 z-[100] transform translate-y-20 transition-all duration-300 pointer-events-none">
+        <div class="bg-gray-800 text-white px-6 py-3 rounded-lg shadow-2xl flex items-center gap-3">
+            <i class="fas fa-check-circle text-green-400"></i>
+            <span id="notif-text">Venda finalizada com sucesso!</span>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA MOCK ---
+        const produtos = [
+            { id: 1, nome: 'Açaí Tradicional 500ml', preco: 18.00, categoria: 'Açaí', condicional: true, img: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&q=80&w=400' },
+            { id: 2, nome: 'Açaí Especial 700ml', preco: 25.00, categoria: 'Açaí', condicional: true, img: 'https://images.unsplash.com/photo-1588531062053-912b777a837f?auto=format&fit=crop&q=80&w=400' },
+            { id: 3, nome: 'Suco de Laranja 400ml', preco: 8.50, categoria: 'Bebidas', img: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&q=80&w=400' },
+            { id: 4, nome: 'Coca-Cola Lata', preco: 6.00, categoria: 'Bebidas', img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=400' },
+            { id: 5, nome: 'X-Burguer Completo', preco: 22.00, categoria: 'Lanches', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400' },
+            { id: 6, nome: 'Batata Frita G', preco: 15.00, categoria: 'Lanches', img: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&q=80&w=400' },
+            { id: 7, nome: 'Petit Gateau', preco: 12.00, categoria: 'Sobremesas', img: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=400' },
+            { id: 8, nome: 'Água Mineral', preco: 4.00, categoria: 'Bebidas', img: 'https://images.unsplash.com/photo-1559839914-17aae19cea9e?auto=format&fit=crop&q=80&w=400' },
+        ];
+
+        const extras = [
+            { id: 101, nome: 'Leite em Pó', preco: 2.50 },
+            { id: 102, nome: 'Leite Condensado', preco: 3.00 },
+            { id: 103, nome: 'Granola', preco: 1.50 },
+            { id: 104, nome: 'Morango fatiado', preco: 4.00 },
+            { id: 105, nome: 'Nutella', preco: 6.00 }
+        ];
+
+        let comandas = [
+            { id: 1, mesa: '01', total: 45.50, status: 'ocupada' },
+            { id: 2, mesa: '02', total: 12.00, status: 'ocupada' },
+            { id: 3, mesa: '03', total: 0.00, status: 'livre' },
+            { id: 4, mesa: '04', total: 88.90, status: 'ocupada' },
+            { id: 5, mesa: '05', total: 0.00, status: 'livre' },
+            { id: 6, mesa: '06', total: 0.00, status: 'livre' },
+        ];
+
+        let carrinho = []; // Agora armazenará objetos { produtoId, nome, precoUnit, qtd, extras, hash }
+        let comandaAtiva = null;
+        let descontos = 0;
+        let pagamentosRealizados = [];
+        let itemSendoCustomizado = null;
+        let extrasSelecionados = [];
+
+        // --- CORE FUNCTIONS ---
+
+        function init() {
+            renderComandas();
+            renderProdutos();
+            updateClock();
+            setInterval(updateClock, 1000);
+            setupKeyboardShortcuts();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }
+
+        function renderComandas() {
+            const grid = document.getElementById('grid-comandas');
+            grid.innerHTML = '';
+            comandas.forEach(comanda => {
+                const card = document.createElement('div');
+                card.className = `card-comanda cursor-pointer p-4 rounded-xl border transition-all ${comanda.status === 'ocupada' ? 'bg-white border-orange-200' : 'bg-gray-50 border-gray-100 opacity-80'}`;
+                card.onclick = () => abrirVenda(comanda);
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs font-bold uppercase tracking-wider ${comanda.status === 'ocupada' ? 'text-orange-600' : 'text-gray-400'}">Mesa ${comanda.mesa}</span>
+                        <div class="w-2 h-2 rounded-full ${comanda.status === 'ocupada' ? 'bg-orange-500 animate-pulse' : 'bg-gray-300'}"></div>
+                    </div>
+                    <div class="text-2xl font-black text-gray-800">R$ ${comanda.total.toFixed(2)}</div>
+                    <div class="mt-4 flex gap-1">
+                        <div class="h-1 flex-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-orange-500" style="width: ${comanda.total > 0 ? '70%' : '0%'}"></div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderProdutos(categoria = 'Tudo') {
+            const grid = document.getElementById('grid-produtos');
+            grid.innerHTML = '';
+            
+            const filtrados = categoria === 'Tudo' ? produtos : produtos.filter(p => p.categoria === categoria);
+
+            filtrados.forEach(prod => {
+                const item = document.createElement('div');
+                item.className = "bg-white rounded-xl shadow-sm border border-gray-100 hover:border-orange-400 cursor-pointer transition-all flex flex-col group overflow-hidden h-64";
+                item.onclick = () => adicionarAoCarrinho(prod);
+                
+                item.innerHTML = `
+                    <div class="overflow-hidden">
+                        <img src="${prod.img}" alt="${prod.nome}" class="product-image group-hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="p-3 flex flex-col justify-between flex-1">
+                        <div>
+                            <span class="text-[10px] font-bold text-orange-500 uppercase">${prod.categoria}</span>
+                            <h4 class="font-bold text-gray-800 group-hover:text-orange-600 transition-colors leading-tight line-clamp-2">${prod.nome}</h4>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <span class="font-bold text-lg text-gray-700">R$ ${prod.preco.toFixed(2)}</span>
+                            <div class="w-8 h-8 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all">
+                                <i class="fas fa-plus text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(item);
+            });
+        }
+
+        function filtrarProdutos(cat) {
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('bg-orange-600', 'text-white');
+                btn.classList.add('bg-gray-100', 'text-gray-600');
+                if(btn.innerText === cat) {
+                    btn.classList.add('bg-orange-600', 'text-white');
+                    btn.classList.remove('bg-gray-100', 'text-gray-600');
+                }
+            });
+            renderProdutos(cat);
+        }
+
+        function abrirVenda(comanda) {
+            comandaAtiva = comanda;
+            document.getElementById('venda-titulo').innerText = `Comanda Mesa ${comanda.mesa}`;
+            document.getElementById('view-comandas').classList.add('hidden');
+            document.getElementById('view-venda').classList.remove('hidden');
+            
+            // Se abrir comanda que já tinha valor mas carrinho tá vazio (mock)
+            if(comanda.total > 0 && carrinho.length === 0) {
+                // Em um sistema real aqui carregaria os itens do banco
+            }
+            atualizarCarrinhoUI();
+        }
+
+        function voltarParaComandas() {
+            comandaAtiva.total = calcularTotal();
+            comandaAtiva.status = comandaAtiva.total > 0 ? 'ocupada' : 'livre';
+            
+            comandaAtiva = null;
+            document.getElementById('view-comandas').classList.remove('hidden');
+            document.getElementById('view-venda').classList.add('hidden');
+            renderComandas();
+        }
+
+        // --- LÓGICA DE EMPILHAMENTO (GRUPAMENTO) ---
+
+        function gerarHashItem(produtoId, extras) {
+            // Cria um identificador único baseado no produto e nos extras selecionados
+            const extrasIds = extras.map(e => e.id).sort().join(',');
+            return `${produtoId}_${extrasIds}`;
+        }
+
+        function adicionarAoCarrinho(produto) {
+            if (produto.condicional) {
+                abrirCondicionais(produto);
+            } else {
+                processarAdicao(produto, []);
+                showToast(`Adicionado: ${produto.nome}`);
+            }
+        }
+
+        function processarAdicao(produto, extrasList) {
+            const hash = gerarHashItem(produto.id, extrasList);
+            const indexExistente = carrinho.findIndex(item => item.hash === hash);
+
+            const totalExtra = extrasList.reduce((acc, curr) => acc + curr.preco, 0);
+            const precoUnitario = produto.preco + totalExtra;
+
+            if (indexExistente > -1) {
+                carrinho[indexExistente].qtd += 1;
+            } else {
+                carrinho.push({
+                    id: produto.id,
+                    nome: produto.nome,
+                    precoUnit: precoUnitario,
+                    qtd: 1,
+                    extras: [...extrasList],
+                    hash: hash
+                });
+            }
+            atualizarCarrinhoUI();
+        }
+
+        // --- CONDICIONAIS ---
+
+        function abrirCondicionais(produto) {
+            itemSendoCustomizado = produto;
+            extrasSelecionados = [];
+            const modal = document.getElementById('modal-condicional');
+            const container = document.getElementById('opcoes-condicionais');
+            container.innerHTML = '';
+            
+            extras.forEach(extra => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-4 mb-2 border border-gray-100 rounded-xl hover:bg-orange-50 cursor-pointer transition-all";
+                div.onclick = () => toggleExtra(extra, div);
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="check-box w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center">
+                            <i class="fas fa-check text-[10px] text-white hidden"></i>
+                        </div>
+                        <span class="font-medium text-gray-700">${extra.nome}</span>
+                    </div>
+                    <span class="text-orange-600 font-bold">+ R$ ${extra.preco.toFixed(2)}</span>
+                `;
+                container.appendChild(div);
+            });
+            
+            modal.classList.remove('hidden');
+            document.getElementById('total-adicionais').innerText = "R$ 0,00";
+        }
+
+        function toggleExtra(extra, element) {
+            const index = extrasSelecionados.findIndex(e => e.id === extra.id);
+            const check = element.querySelector('.check-box');
+            const icon = element.querySelector('i');
+
+            if (index > -1) {
+                extrasSelecionados.splice(index, 1);
+                check.classList.remove('bg-orange-500', 'border-orange-500');
+                icon.classList.add('hidden');
+            } else {
+                extrasSelecionados.push(extra);
+                check.classList.add('bg-orange-500', 'border-orange-500');
+                icon.classList.remove('hidden');
+            }
+            
+            const totalExtra = extrasSelecionados.reduce((acc, curr) => acc + curr.preco, 0);
+            document.getElementById('total-adicionais').innerText = `R$ ${totalExtra.toFixed(2)}`;
+        }
+
+        function confirmarAdicionais() {
+            processarAdicao(itemSendoCustomizado, extrasSelecionados);
+            fecharModalCondicional();
+            showToast("Item personalizado adicionado");
+        }
+
+        function fecharModalCondicional() {
+            document.getElementById('modal-condicional').classList.add('hidden');
+            itemSendoCustomizado = null;
+        }
+
+        // --- CARRINHO & FINANCEIRO ---
+
+        function alterarQtd(hash, delta) {
+            const idx = carrinho.findIndex(i => i.hash === hash);
+            if (idx > -1) {
+                carrinho[idx].qtd += delta;
+                if (carrinho[idx].qtd <= 0) {
+                    carrinho.splice(idx, 1);
+                }
+                atualizarCarrinhoUI();
+            }
+        }
+
+        function removerLinha(hash) {
+            carrinho = carrinho.filter(i => i.hash !== hash);
+            atualizarCarrinhoUI();
+        }
+
+        function atualizarCarrinhoUI() {
+            const container = document.getElementById('lista-carrinho');
+            container.innerHTML = '';
+            
+            if(carrinho.length === 0) {
+                container.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center text-gray-400 opacity-50 py-10">
+                        <i class="fas fa-shopping-basket text-4xl mb-2"></i>
+                        <p class="text-sm">Carrinho Vazio</p>
+                    </div>
+                `;
+            }
+
+            carrinho.forEach(item => {
+                const totalItem = item.precoUnit * item.qtd;
+                const div = document.createElement('div');
+                div.className = "p-3 bg-white rounded-lg border border-gray-100 shadow-sm flex flex-col gap-1 relative group";
+                
+                let extrasHtml = item.extras.length > 0 ? 
+                    `<p class="text-[10px] text-gray-400 italic">Extras: ${item.extras.map(e => e.nome).join(', ')}</p>` : '';
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <span class="text-sm font-bold text-gray-700">${item.nome}</span>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="bg-orange-100 text-orange-700 text-[10px] font-bold px-1.5 py-0.5 rounded">${item.qtd}x</span>
+                                <span class="text-[11px] text-gray-500">R$ ${item.precoUnit.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-sm font-bold text-orange-600 block">R$ ${totalItem.toFixed(2)}</span>
+                            <div class="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick="alterarQtd('${item.hash}', -1)" class="w-6 h-6 bg-gray-100 rounded flex items-center justify-center text-gray-500 hover:bg-orange-100 hover:text-orange-600">
+                                    <i class="fas fa-minus text-[10px]"></i>
+                                </button>
+                                <button onclick="alterarQtd('${item.hash}', 1)" class="w-6 h-6 bg-gray-100 rounded flex items-center justify-center text-gray-500 hover:bg-orange-100 hover:text-orange-600">
+                                    <i class="fas fa-plus text-[10px]"></i>
+                                </button>
+                                <button onclick="removerLinha('${item.hash}')" class="w-6 h-6 bg-red-50 text-red-500 rounded flex items-center justify-center hover:bg-red-500 hover:text-white">
+                                    <i class="fas fa-trash text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    ${extrasHtml}
+                `;
+                container.appendChild(div);
+            });
+
+            const sub = carrinho.reduce((acc, curr) => acc + (curr.precoUnit * curr.qtd), 0);
+            document.getElementById('subtotal').innerText = `R$ ${sub.toFixed(2)}`;
+            document.getElementById('total').innerText = `R$ ${(sub - descontos).toFixed(2)}`;
+        }
+
+        function calcularTotal() {
+            const sub = carrinho.reduce((acc, curr) => acc + (curr.precoUnit * curr.qtd), 0);
+            return sub - descontos;
+        }
+
+        // --- PAGAMENTO ---
+
+        function abrirModalPagamento() {
+            if(carrinho.length === 0) return showToast("Adicione itens primeiro!", "error");
+            
+            const total = calcularTotal();
+            document.getElementById('pag-total-display').innerText = `R$ ${total.toFixed(2)}`;
+            document.getElementById('pag-recebido-display').innerText = `R$ 0,00`;
+            document.getElementById('pag-troco-display').innerText = `R$ 0,00`;
+            document.getElementById('modal-pagamento').classList.remove('hidden');
+            pagamentosRealizados = [];
+            renderPagamentos();
+        }
+
+        function fecharModalPagamento() {
+            document.getElementById('modal-pagamento').classList.add('hidden');
+        }
+
+        function adicionarPagamento(metodo) {
+            const totalPendente = calcularTotal() - pagamentosRealizados.reduce((acc, curr) => acc + curr.valor, 0);
+            if(totalPendente <= 0) return;
+
+            const valor = totalPendente; 
+            
+            pagamentosRealizados.push({ metodo, valor });
+            renderPagamentos();
+            
+            const totalRecebido = pagamentosRealizados.reduce((acc, curr) => acc + curr.valor, 0);
+            document.getElementById('pag-recebido-display').innerText = `R$ ${totalRecebido.toFixed(2)}`;
+            
+            const troco = totalRecebido - calcularTotal();
+            document.getElementById('pag-troco-display').innerText = `R$ ${troco > 0 ? troco.toFixed(2) : '0,00'}`;
+        }
+
+        function renderPagamentos() {
+            const list = document.getElementById('lista-pagamentos');
+            list.innerHTML = '';
+            pagamentosRealizados.forEach((p, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-white p-2 rounded-lg text-sm border-l-4 border-orange-500";
+                div.innerHTML = `
+                    <span class="text-gray-600 font-medium">${p.metodo}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold">R$ ${p.valor.toFixed(2)}</span>
+                        <button onclick="removerPagamento(${idx})" class="text-red-400"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function removerPagamento(idx) {
+            pagamentosRealizados.splice(idx, 1);
+            renderPagamentos();
+            const totalRecebido = pagamentosRealizados.reduce((acc, curr) => acc + curr.valor, 0);
+            document.getElementById('pag-recebido-display').innerText = `R$ ${totalRecebido.toFixed(2)}`;
+        }
+
+        function finalizarTudo() {
+            const totalRecebido = pagamentosRealizados.reduce((acc, curr) => acc + curr.valor, 0);
+            if(totalRecebido < calcularTotal()) {
+                showToast("Valor insuficiente para fechar", "error");
+                return;
+            }
+
+            showToast("Venda Finalizada com Sucesso!", "success");
+            
+            comandaAtiva.total = 0;
+            comandaAtiva.status = 'livre';
+            carrinho = [];
+            descontos = 0;
+            
+            setTimeout(() => {
+                fecharModalPagamento();
+                voltarParaComandas();
+            }, 1000);
+        }
+
+        // --- UTILS ---
+
+        function showToast(text, type = "success") {
+            const toast = document.getElementById('notification');
+            const toastText = document.getElementById('notif-text');
+            toastText.innerText = text;
+            
+            toast.classList.remove('translate-y-20');
+            toast.classList.add('translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0');
+                toast.classList.add('translate-y-20');
+            }, 3000);
+        }
+
+        function setupKeyboardShortcuts() {
+            window.addEventListener('keydown', (e) => {
+                if(e.key === 'Escape') {
+                    fecharModalCondicional();
+                    fecharModalPagamento();
+                }
+
+                if(!document.getElementById('modal-pagamento').classList.contains('hidden')) {
+                    if(e.key === '1') adicionarPagamento('Dinheiro');
+                    if(e.key === '2') adicionarPagamento('Cartão Crédito');
+                    if(e.key === '3') adicionarPagamento('PIX');
+                    if(e.key === 'F5' || e.key === 'Enter') finalizarTudo();
+                }
+
+                if(!document.getElementById('view-venda').classList.contains('hidden') && e.key === 'F5') {
+                    abrirModalPagamento();
+                }
+            });
+        }
+
+        function abrirModalDesconto() {
+            const valorStr = prompt("Valor do Desconto (R$):", "0.00");
+            const valor = parseFloat(valorStr);
+            if(!isNaN(valor)) {
+                descontos = valor;
+                document.getElementById('desconto').innerText = `- R$ ${descontos.toFixed(2)}`;
+                atualizarCarrinhoUI();
+            }
+        }
+
+        function abrirModalDivisao() {
+            const pessoas = prompt("Dividir em quantas pessoas?", "2");
+            if(pessoas > 1) {
+                const cada = calcularTotal() / pessoas;
+                showToast(`Cada pessoa paga: R$ ${cada.toFixed(2)}`, "info");
+            }
+        }
+
+        function novaComanda() {
+            const mesa = prompt("Número da Mesa/Comanda:", "");
+            if(mesa) {
+                const exist = comandas.find(c => c.mesa === mesa);
+                if(exist) {
+                    abrirVenda(exist);
+                } else {
+                    const nova = { id: Date.now(), mesa: mesa, total: 0, status: 'livre' };
+                    comandas.push(nova);
+                    renderComandas();
+                    abrirVenda(nova);
+                }
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

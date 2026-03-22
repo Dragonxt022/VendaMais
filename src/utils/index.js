@@ -25,8 +25,13 @@ const {
 // Validadores de Entidades (Categorias, Fornecedores)
 const {
   categoryValidation,
+  accountCategoryValidation,
   supplierValidation
 } = require('./entityValidators');
+const {
+  normalizeCurrencyInput,
+  formatCurrency
+} = require('./currency');
 
 // Middleware de Validação
 const {
@@ -57,6 +62,7 @@ const stockRoutes = {
 
 const entityRoutes = {
   category: [categoryValidation, handleValidationErrors],
+  accountCategory: [accountCategoryValidation, handleValidationErrors],
   supplier: [supplierValidation, handleValidationErrors]
 };
 
@@ -81,6 +87,7 @@ module.exports = {
   
   entityValidators: {
     categoryValidation,
+    accountCategoryValidation,
     supplierValidation
   },
   
@@ -114,7 +121,10 @@ module.exports = {
   validateStockManagement,
   validateBulkStockAdjustment,
   categoryValidation,
+  accountCategoryValidation,
   supplierValidation,
+  normalizeCurrencyInput,
+  formatCurrency,
   handleValidationErrors,
   validate,
   validateAndSanitize,

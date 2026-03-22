@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -14,6 +14,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var adminRouter = require('./routes/admin');
 var app = express();
+const isDebugSessionEnabled = process.env.DEBUG_SESSION === 'true';
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -38,8 +39,8 @@ app.use(session({
   key: 'vendamais.sid',
   secret: process.env.SECRET || 'vendamais-dev-secret',
   store: sessionStore,
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   proxy: true,
   cookie: {
     path: '/',
@@ -51,7 +52,10 @@ app.use(session({
 }));
 
 app.use((req, res, next) => {
-  console.log(`[DEBUG SESSION] Path: ${req.path} | ID: ${req.sessionID} | User na Sessao: ${req.session.user ? req.session.user.email : 'Vazio'}`);
+  if (isDebugSessionEnabled) {
+    const sessionEmail = req.session && req.session.user ? req.session.user.email : 'vazio';
+    console.log(`[DEBUG SESSION] Path: ${req.path} | ID: ${req.sessionID} | User na Sessao: ${sessionEmail}`);
+  }
   next();
 });
 

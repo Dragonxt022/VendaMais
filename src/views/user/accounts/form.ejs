@@ -1,0 +1,136 @@
+<section class="mb-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900"><%= pageTitle %></h1>
+        <p class="mt-2 text-slate-500">Cadastre gastos, boletos e faturas com espaco para o fluxo crescer no futuro.</p>
+    </div>
+    <a href="/app/accounts" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50">
+        Voltar
+    </a>
+</section>
+
+<section class="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr,0.8fr]">
+    <form action="<%= formMode === 'create' ? '/app/accounts' : '/app/accounts/' + account.id %>" method="POST" enctype="multipart/form-data" class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Categoria da conta</label>
+                <div class="flex gap-2">
+                    <select id="account_category_id" name="account_category_id" required class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                        <% categories.forEach(category => { %>
+                            <option value="<%= category.id %>" <%= String(account.account_category_id || '') === String(category.id) ? 'selected' : '' %>><%= category.name %></option>
+                        <% }) %>
+                    </select>
+                    <button type="button" onclick="toggleAccountCategoryModal(true)" class="inline-flex h-[50px] w-[50px] items-center justify-center rounded-xl border border-slate-200 bg-white text-lg font-bold text-food-orange transition-colors hover:border-orange-200 hover:bg-orange-50">+</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Valor</label>
+                <input type="text" name="amount" value="<%= account.amount || '' %>" placeholder="0,00" required class="js-currency-input w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+            </div>
+
+            <div>
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Data emitida</label>
+                <input type="date" name="issued_at" value="<%= account.issued_at || '' %>" required class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Data de vencimento</label>
+                <input type="date" name="due_date" value="<%= account.due_date || '' %>" required class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Informacoes adicionais</label>
+                <textarea name="notes" rows="4" class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20"><%= account.notes || '' %></textarea>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Enviar boleto/fatura</label>
+                <input type="file" name="attachment" accept="image/*,application/pdf" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-all file:mr-4 file:rounded-lg file:border-0 file:bg-orange-50 file:px-4 file:py-2 file:font-semibold file:text-orange-700 hover:file:bg-orange-100">
+            </div>
+
+            <% if (formMode === 'edit' && account.attachment_url) { %>
+                <div class="md:col-span-2">
+                    <label class="inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                        <input type="checkbox" name="removeAttachment" value="true" class="h-4 w-4 rounded border-slate-300 text-food-orange focus:ring-food-orange">
+                        Remover anexo atual
+                    </label>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="mt-8 flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
+            <a href="/app/accounts" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50">
+                Cancelar
+            </a>
+            <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-food-orange px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200/60 transition-colors hover:bg-orange-600">
+                <%= submitLabel %>
+            </button>
+        </div>
+    </form>
+
+    <aside class="space-y-6">
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Resumo</p>
+            <div class="mt-4 space-y-3 text-sm text-slate-500">
+                <p>Use este modulo para contas fixas, boletos, faturas e despesas operacionais.</p>
+                <p>Se nenhuma categoria existir, o sistema garante automaticamente a opcao "Outro".</p>
+                <% if (account.attachment_url) { %>
+                    <a href="<%= account.attachment_url %>" target="_blank" class="font-semibold text-food-orange hover:underline">Abrir anexo atual</a>
+                <% } %>
+            </div>
+        </section>
+    </aside>
+</section>
+
+<%- include('../../partials/modals/quick_account_category_modal') %>
+
+<script>
+    function toggleAccountCategoryModal(show) {
+        const modal = document.getElementById('quickAccountCategoryModal');
+        if (!modal) return;
+        modal.classList.toggle('hidden', !show);
+    }
+
+    async function submitQuickAccountCategory(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const button = form.querySelector('button[type="submit"]');
+        const originalLabel = button.textContent;
+
+        button.disabled = true;
+        button.textContent = 'Salvando...';
+
+        try {
+            const formData = new URLSearchParams(new FormData(form));
+            const response = await fetch('/app/accounts/categories', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.category) {
+                throw new Error(data.error || 'Erro ao salvar categoria');
+            }
+
+            const select = document.getElementById('account_category_id');
+            const option = new Option(data.category.name, data.category.id, true, true);
+            select.add(option);
+            select.value = String(data.category.id);
+
+            form.reset();
+            form.color.value = '#94a3b8';
+            toggleAccountCategoryModal(false);
+            window.notify('Categoria criada e selecionada!', 'success');
+        } catch (error) {
+            window.notify(error.message || 'Erro ao salvar categoria', 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = originalLabel;
+        }
+    }
+</script>

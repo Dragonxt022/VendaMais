@@ -1,4 +1,5 @@
 const { body, param, query } = require("express-validator");
+const { normalizeCurrencyInput } = require("./currency");
 
 /**
  * Validações para criação de produtos
@@ -37,11 +38,7 @@ const createProductValidation = [
 
   body("price")
     .customSanitizer((value) => {
-      if (typeof value === "string" && value.trim() !== "") {
-        // Remove thousands separators (dots) and replace decimal separator (comma) with dot
-        return value.replace(/\./g, "").replace(",", ".");
-      }
-      return value;
+      return normalizeCurrencyInput(value, { emptyValue: value, asString: true });
     })
     .notEmpty()
     .withMessage("Preço é obrigatório")
@@ -51,10 +48,7 @@ const createProductValidation = [
   body("cost")
     .optional({ checkFalsy: true })
     .customSanitizer((value) => {
-      if (typeof value === "string" && value.trim() !== "") {
-        return value.replace(/\./g, "").replace(",", ".");
-      }
-      return value;
+      return normalizeCurrencyInput(value, { emptyValue: value, asString: true });
     })
     .isFloat({ min: 0, max: 999999.99 })
     .withMessage("Custo deve ser um número positivo (máximo: 999999.99)")
@@ -169,10 +163,7 @@ const updateProductValidation = [
   body("price")
     .optional()
     .customSanitizer((value) => {
-      if (typeof value === "string" && value.trim() !== "") {
-        return value.replace(/\./g, "").replace(",", ".");
-      }
-      return value;
+      return normalizeCurrencyInput(value, { emptyValue: value, asString: true });
     })
     .isFloat({ min: 0, max: 999999.99 })
     .withMessage("Preço deve ser um número positivo (máximo: 999999.99)"),
@@ -180,10 +171,7 @@ const updateProductValidation = [
   body("cost")
     .optional()
     .customSanitizer((value) => {
-      if (typeof value === "string" && value.trim() !== "") {
-        return value.replace(/\./g, "").replace(",", ".");
-      }
-      return value;
+      return normalizeCurrencyInput(value, { emptyValue: value, asString: true });
     })
     .isFloat({ min: 0, max: 999999.99 })
     .withMessage("Custo deve ser um número positivo (máximo: 999999.99)")
@@ -288,6 +276,9 @@ const bulkAdjustValidation = [
     .withMessage("Modo deve ser: fixed ou percentage"),
 
   body("value")
+    .customSanitizer((value) => {
+      return normalizeCurrencyInput(value, { emptyValue: value, asString: true });
+    })
     .isFloat({ min: -999999, max: 999999 })
     .withMessage("Valor deve estar entre -999999 e 999999")
     .custom((value, { req }) => {

@@ -18,6 +18,21 @@ const categoryValidation = [
     .withMessage('Cor deve ser um código hexadecimal válido (#RRGGBB ou #RGB)')
 ];
 
+const accountCategoryValidation = [
+  body('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Nome da categoria e obrigatorio')
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Nome deve ter entre 2 e 100 caracteres'),
+
+  body('color')
+    .optional({ checkFalsy: true })
+    .trim()
+    .matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
+    .withMessage('Cor deve ser um codigo hexadecimal valido (#RRGGBB ou #RGB)')
+];
+
 /**
  * Validações para criação/atualização de fornecedores
  */
@@ -77,5 +92,6 @@ const supplierValidation = [
 
 module.exports = {
   categoryValidation,
+  accountCategoryValidation,
   supplierValidation
 };

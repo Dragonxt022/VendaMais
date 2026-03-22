@@ -6,7 +6,7 @@ const Sequelize = require('sequelize');
 const process = require('process');
 
 const basename = path.basename(__filename);
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const env = process.env.NODE_ENV || 'development';
 const db = {};
@@ -40,12 +40,10 @@ if (dbDialect === 'sqlite') {
   const dbStorage = process.env.DB_STORAGE || defaults.storage;
   fs.mkdirSync(path.dirname(dbStorage), { recursive: true });
 
-  console.log(`[Database] Usando SQLite em '${dbStorage}' (${env})...`);
-
   sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: dbStorage,
-    logging: env === 'development' ? console.log : false,
+    logging: process.env.DB_LOGGING === 'true' ? console.log : false,
     define: {
       timestamps: true
     }
@@ -57,14 +55,11 @@ if (dbDialect === 'sqlite') {
   const dbHost = process.env.DB_HOST || defaults.host;
   const dbPort = Number(process.env.DB_PORT || defaults.port);
 
-  console.log(`[Database] Tentando conectar como '${dbUser}' em '${dbHost}:${dbPort}' no banco '${dbName}'...`);
-  console.log(`[Database] Usando ${dbDialect} com variaveis individuais (${env})...`);
-
   sequelize = new Sequelize(dbName, dbUser, dbPass, {
     host: dbHost,
     port: dbPort,
     dialect: dbDialect,
-    logging: env === 'development' ? console.log : false,
+    logging: process.env.DB_LOGGING === 'true' ? console.log : false,
     define: {
       timestamps: true
     }

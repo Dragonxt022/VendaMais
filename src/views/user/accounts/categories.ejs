@@ -1,0 +1,89 @@
+<section class="mb-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+    <div>
+        <h1 class="text-3xl font-bold text-slate-900">Categorias de Contas</h1>
+        <p class="mt-2 text-slate-500">Organize as contas a pagar com categorias reutilizaveis no cadastro.</p>
+    </div>
+    <button type="button" onclick="toggleAccountCategoryModal(true)" class="inline-flex items-center justify-center rounded-xl bg-food-orange px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200/60 transition-colors hover:bg-orange-600">
+        Nova Categoria
+    </button>
+</section>
+
+<section class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Categoria</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Descricao</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Contas vinculadas</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <% if (categories.length > 0) { %>
+                    <% categories.forEach(category => { %>
+                        <tr class="transition-colors hover:bg-orange-50/40">
+                            <td class="px-6 py-5">
+                                <div class="flex items-center gap-3">
+                                    <span class="h-3 w-3 rounded-full" style="background-color: <%= category.color %>"></span>
+                                    <p class="font-semibold text-slate-900"><%= category.name %></p>
+                                </div>
+                            </td>
+                            <td class="px-6 py-5 text-slate-500"><%= category.description || 'Sem descricao adicional' %></td>
+                            <td class="px-6 py-5 text-slate-900 font-semibold"><%= category.accountsCount %></td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="3" class="px-6 py-16 text-center text-slate-500">Nenhuma categoria cadastrada ainda.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<%- include('../../partials/modals/quick_account_category_modal') %>
+
+<script>
+    function toggleAccountCategoryModal(show) {
+        const modal = document.getElementById('quickAccountCategoryModal');
+        if (!modal) return;
+        modal.classList.toggle('hidden', !show);
+    }
+
+    async function submitQuickAccountCategory(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const button = form.querySelector('button[type="submit"]');
+        const originalLabel = button.textContent;
+
+        button.disabled = true;
+        button.textContent = 'Salvando...';
+
+        try {
+            const formData = new URLSearchParams(new FormData(form));
+            const response = await fetch('/app/accounts/categories', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro ao salvar categoria');
+            }
+
+            window.notify('Categoria criada com sucesso!', 'success');
+            window.location.reload();
+        } catch (error) {
+            window.notify(error.message || 'Erro ao salvar categoria', 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = originalLabel;
+        }
+    }
+</script>

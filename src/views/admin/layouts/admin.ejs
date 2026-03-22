@@ -3,83 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - VendaMais</title>
+    <title><%= typeof title !== 'undefined' ? title : 'Admin - VendaMais' %></title>
     <link rel="stylesheet" href="/stylesheets/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-</head>
-<body class="bg-slate-900 font-sans antialiased text-slate-100">
-    <div class="flex min-h-screen relative">
-        <!-- Sidebar Overlay (Mobile) -->
-        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+    <link rel="icon" href="/uploads/icon/favicon.png">
+    <style>
+        .admin-shell {
+            background:
+                radial-gradient(circle at top left, rgba(249, 115, 22, 0.12), transparent 28rem),
+                linear-gradient(180deg, #fffaf5 0%, #f8fafc 18%, #f8fafc 100%);
+        }
 
-        <!-- Sidebar Admin -->
-        <aside id="sidebar" class="fixed md:sticky top-0 left-0 w-64 bg-slate-950 border-r border-slate-800 flex flex-col h-screen z-50 transition-transform -translate-x-full md:translate-x-0">
-            <div class="p-6 flex items-center justify-between">
-                <a href="/admin/dashboard" class="text-xl font-bold bg-gradient-to-r from-food-orange to-orange-400 bg-clip-text text-transparent">
-                    VendaMais <span class="text-xs text-slate-500 align-top">Admin</span>
+        .admin-sidebar {
+            width: 17rem;
+            transition: width 180ms ease, transform 180ms ease;
+        }
+
+        .admin-sidebar.is-collapsed {
+            width: 5.5rem;
+        }
+
+        .admin-sidebar.is-collapsed .admin-brand-text,
+        .admin-sidebar.is-collapsed .admin-link-label,
+        .admin-sidebar.is-collapsed .admin-sidebar-footer-text,
+        .admin-sidebar.is-collapsed .admin-section-title,
+        .admin-sidebar.is-collapsed .admin-link-badge {
+            display: none;
+        }
+
+        .admin-sidebar.is-collapsed .admin-link {
+            justify-content: center;
+        }
+
+        .admin-content {
+            transition: margin-left 180ms ease;
+        }
+
+        @media (max-width: 767px) {
+            .admin-sidebar {
+                width: 17rem;
+            }
+
+            .admin-sidebar.is-collapsed {
+                width: 17rem;
+            }
+
+            .admin-sidebar.is-collapsed .admin-brand-text,
+            .admin-sidebar.is-collapsed .admin-link-label,
+            .admin-sidebar.is-collapsed .admin-sidebar-footer-text,
+            .admin-sidebar.is-collapsed .admin-section-title,
+            .admin-sidebar.is-collapsed .admin-link-badge {
+                display: initial;
+            }
+
+            .admin-sidebar.is-collapsed .admin-link {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body class="admin-shell min-h-screen font-sans antialiased text-slate-900">
+    <div class="flex min-h-screen">
+        <div id="admin-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+        <aside id="admin-sidebar" class="admin-sidebar fixed top-0 left-0 z-50 flex h-screen -translate-x-full flex-col border-r border-orange-100 bg-white/95 shadow-xl shadow-orange-100/40 backdrop-blur md:sticky md:translate-x-0">
+            <div class="flex items-center justify-between px-4 py-5 border-b border-slate-100">
+                <a href="/admin/dashboard" class="flex items-center gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-food-orange to-orange-700 text-white shadow-lg shadow-orange-200/60">
+                        <img class="w-5 h-5" src="/uploads/icon/box-produtos.svg" alt="Admin">
+                    </span>
+                    <span class="admin-brand-text">
+                        <span class="block text-lg font-bold text-slate-900">VendaMais</span>
+                        <span class="block text-xs font-semibold uppercase tracking-wider text-orange-700">Painel Admin</span>
+                    </span>
                 </a>
-                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="admin-sidebar-collapse" type="button" class="hidden md:inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-food-orange">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    <button id="admin-sidebar-close" type="button" class="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-food-orange">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            
-            <nav class="flex-1 px-4 space-y-1 mt-4 text-sm uppercase tracking-wider font-bold overflow-y-auto">
-                <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-                    DASHBOARD
+
+            <div class="px-4 pt-5 pb-3">
+                <p class="admin-section-title text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">Administracao</p>
+            </div>
+
+            <nav class="flex-1 space-y-1 px-3">
+                <a href="/admin/dashboard" data-admin-link class="admin-link group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-orange-50 hover:text-food-orange">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-food-orange">
+                        <img class="w-5 h-5" src="/uploads/icon/home.svg" alt="Dashboard">
+                    </span>
+                    <span class="admin-link-label flex-1">Dashboard</span>
                 </a>
-                <a href="/admin/companies" class="flex items-center gap-3 px-4 py-3 text-food-orange bg-white/5 rounded-xl">
-                    EMPRESAS
+
+                <a href="/admin/companies" data-admin-link class="admin-link group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-orange-50 hover:text-food-orange">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-food-orange">
+                        <img class="w-5 h-5" src="/uploads/icon/box.svg" alt="Empresas">
+                    </span>
+                    <span class="admin-link-label flex-1">Empresas</span>
                 </a>
-                <a href="/admin/global-catalog" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-                    CATÁLOGO GLOBAL
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-                    USUÁRIOS
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-                    FINANCEIRO
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors">
-                    SEGURANÇA
+
+                <a href="/admin/global-catalog" data-admin-link class="admin-link group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-orange-50 hover:text-food-orange">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors group-hover:bg-white group-hover:text-food-orange">
+                        <img class="w-5 h-5" src="/uploads/icon/search.svg" alt="Catalogo global">
+                    </span>
+                    <span class="admin-link-label flex-1">Catalogo Global</span>
+                    <span class="admin-link-badge rounded-full bg-orange-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-orange-700">Beta</span>
                 </a>
             </nav>
 
-            <div class="p-4 border-t border-slate-900">
-                <a href="/logout" class="flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors font-medium">
-                    Sair
+            <div class="border-t border-slate-100 p-3">
+                <a href="/logout" class="admin-link group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-red-500 transition-all hover:bg-red-50">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-500">
+                        <img class="w-5 h-5" src="/uploads/icon/door.svg" alt="Sair">
+                    </span>
+                    <span class="admin-sidebar-footer-text">Sair</span>
                 </a>
             </div>
         </aside>
 
-        <div class="flex-1 flex flex-col min-w-0">
-            <!-- Mobile Header -->
-            <header class="md:hidden h-16 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-4 sticky top-0 z-30">
-                <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white p-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-                <span class="font-bold text-slate-100">Admin Panel</span>
-                <div class="w-8"></div> <!-- Spacer for centering -->
+        <div class="admin-content flex min-w-0 flex-1 flex-col">
+            <header class="sticky top-0 z-30 border-b border-orange-100 bg-white/80 backdrop-blur">
+                <div class="flex items-center justify-between px-4 py-4 md:px-8">
+                    <div class="flex items-center gap-3">
+                        <button id="admin-sidebar-open" type="button" class="inline-flex md:hidden h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-food-orange">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.24em] text-orange-700">Administrador</p>
+                            <h1 class="text-lg font-bold text-slate-900"><%= typeof title !== 'undefined' ? title : 'Painel Admin' %></h1>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                        <div class="hidden text-right sm:block">
+                            <p class="text-[11px] font-bold uppercase tracking-[0.24em] text-slate-400">Sessao</p>
+                            <p class="text-sm font-semibold text-slate-900"><%= user && user.name ? user.name : 'Administrador' %></p>
+                        </div>
+                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-100 text-sm font-bold text-orange-800">
+                            <%= user && user.name ? user.name.charAt(0).toUpperCase() : 'A' %>
+                        </div>
+                    </div>
+                </div>
             </header>
 
-            <main class="flex-1 p-4 md:p-10">
+            <main class="flex-1 px-4 py-6 md:px-8 md:py-8">
                 <%- body %>
             </main>
         </div>
     </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            
-            if (sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
+        (function () {
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('admin-overlay');
+            const openButton = document.getElementById('admin-sidebar-open');
+            const closeButton = document.getElementById('admin-sidebar-close');
+            const collapseButton = document.getElementById('admin-sidebar-collapse');
+            const storageKey = 'vendamais-admin-sidebar-collapsed';
+
+            function setMobileSidebar(open) {
+                if (window.innerWidth >= 768) return;
+
+                if (open) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
             }
-        }
+
+            function setDesktopCollapsed(collapsed) {
+                if (window.innerWidth < 768) return;
+
+                sidebar.classList.toggle('is-collapsed', collapsed);
+                collapseButton.querySelector('svg').style.transform = collapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+                localStorage.setItem(storageKey, collapsed ? '1' : '0');
+            }
+
+            function applyStoredState() {
+                const collapsed = localStorage.getItem(storageKey) === '1';
+                if (window.innerWidth >= 768) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.add('hidden');
+                    setDesktopCollapsed(collapsed);
+                } else {
+                    sidebar.classList.remove('is-collapsed');
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
+            }
+
+            function highlightActiveLinks() {
+                const currentPath = window.location.pathname;
+                document.querySelectorAll('[data-admin-link]').forEach((link) => {
+                    const href = link.getAttribute('href');
+                    const isActive = currentPath === href || (href !== '/admin/dashboard' && currentPath.startsWith(href));
+
+                    if (isActive) {
+                        link.classList.add('bg-orange-50', 'text-food-orange', 'shadow-sm');
+                        const iconWrap = link.querySelector('span');
+                        if (iconWrap) {
+                            iconWrap.classList.remove('bg-slate-100', 'text-slate-500');
+                            iconWrap.classList.add('bg-white', 'text-food-orange', 'shadow-sm');
+                        }
+                    }
+                });
+            }
+
+            openButton.addEventListener('click', () => setMobileSidebar(true));
+            closeButton.addEventListener('click', () => setMobileSidebar(false));
+            overlay.addEventListener('click', () => setMobileSidebar(false));
+            collapseButton.addEventListener('click', () => {
+                const collapsed = !sidebar.classList.contains('is-collapsed');
+                setDesktopCollapsed(collapsed);
+            });
+            window.addEventListener('resize', applyStoredState);
+
+            document.addEventListener('DOMContentLoaded', () => {
+                applyStoredState();
+                highlightActiveLinks();
+            });
+
+            applyStoredState();
+            highlightActiveLinks();
+        })();
     </script>
 </body>
 </html>

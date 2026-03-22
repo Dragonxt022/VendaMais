@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 require('./bin/www');

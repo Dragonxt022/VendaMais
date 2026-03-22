@@ -12,10 +12,10 @@ const createDirectoryPath = (baseDir, subDir = '') => {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
-  
+
   const fullPath = path.join(baseDir, subDir, year.toString(), month);
   ensureDirectoryExists(fullPath);
-  
+
   return fullPath;
 };
 
@@ -26,13 +26,11 @@ const generateUniqueFileName = (file) => {
   return `${timestamp}_${randomString}${ext}`;
 };
 
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-  
+const buildFileFilter = (allowedTypes, errorMessage) => (req, file, cb) => {
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Tipo de arquivo inválido. Apenas JPEG, PNG, GIF e WebP são permitidos.'), false);
+    cb(new Error(errorMessage), false);
   }
 };
 
@@ -40,8 +38,10 @@ const createUploadMiddleware = (options = {}) => {
   const {
     destination = 'src/public/uploads',
     subDirectory = '',
-    maxFileSize = 5 * 1024 * 1024, // 5MB
-    fieldName = 'image'
+    maxFileSize = 5 * 1024 * 1024,
+    fieldName = 'image',
+    allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
+    invalidFileMessage = 'Tipo de arquivo invalido. Apenas JPEG, PNG, GIF e WebP sao permitidos.'
   } = options;
 
   const storage = multer.diskStorage({
@@ -52,14 +52,17 @@ const createUploadMiddleware = (options = {}) => {
     filename: (req, file, cb) => {
       const fileName = generateUniqueFileName(file);
       req.uploadedFileName = fileName;
-      req.uploadedFilePath = path.relative(process.cwd(), path.join(createDirectoryPath(destination, subDirectory), fileName));
+      req.uploadedFilePath = path.relative(
+        process.cwd(),
+        path.join(createDirectoryPath(destination, subDirectory), fileName)
+      );
       cb(null, fileName);
     }
   });
 
   return multer({
     storage,
-    fileFilter,
+    fileFilter: buildFileFilter(allowedMimeTypes, invalidFileMessage),
     limits: {
       fileSize: maxFileSize,
       files: 1
@@ -72,5 +75,5 @@ module.exports = {
   ensureDirectoryExists,
   createDirectoryPath,
   generateUniqueFileName,
-  fileFilter
+  buildFileFilter
 };

@@ -1,4 +1,4 @@
-const { sequelize, Company, User, Category, Supplier } = require('../src/models');
+const { sequelize, Company, User, Category, Supplier, AccountCategory } = require('../src/models');
 const bcrypt = require('bcryptjs');
 
 async function reset() {
@@ -46,7 +46,13 @@ async function reset() {
       name: 'Fornecedor Padrao',
       company_id: company.id
     });
-    console.log('Categoria e Fornecedor base criados.');
+    await AccountCategory.create({
+      name: 'Outro',
+      description: 'Categoria padrao para contas a pagar',
+      color: '#94a3b8',
+      company_id: company.id
+    });
+    console.log('Categoria, Fornecedor e Categoria de Contas base criados.');
 
     console.log('\n--- RESET CONCLUIDO ---');
     console.log('Acesse com: gerente@teste.com / teste123');

@@ -1,31 +1,107 @@
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 text-white p-6 md:p-8 rounded-3xl mb-8 gap-4">
-    <div>
-        <h1 class="text-2xl font-bold">Painel de Controle Admin</h1>
-        <p class="text-slate-400 text-sm mt-1">Gerenciamento global da plataforma VendaMais</p>
+<section class="mb-8 rounded-[2rem] border border-orange-100 bg-white p-6 shadow-sm md:p-8">
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-2xl">
+            <p class="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-orange-700">Visao Geral</p>
+            <h2 class="text-3xl font-bold text-slate-900">Painel administrativo da plataforma</h2>
+            <p class="mt-3 text-slate-500">
+                Acompanhe o estado do sistema, a base de empresas e os pontos mais sensiveis da operacao em um unico lugar.
+            </p>
+        </div>
+        <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700 shadow-sm">
+            Sistema: <span class="font-bold"><%= overview.systemHeat %></span>
+        </div>
     </div>
-    <div class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-bold border border-green-500/30">
-        Status: <%= overview.systemHeat %>
-    </div>
-</div>
+</section>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="bg-white p-6 rounded-2xl border border-slate-200">
-        <h3 class="text-slate-400 text-sm font-medium mb-4">Total de Restaurantes</h3>
-        <div class="text-4xl font-bold text-slate-900"><%= overview.totalUsers %></div>
-    </div>
+<section class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Empresas Ativas</p>
+        <div class="mt-4 flex items-end justify-between">
+            <div>
+                <p class="text-4xl font-bold text-slate-900"><%= overview.totalUsers %></p>
+                <p class="mt-2 text-sm text-slate-500">Contas monitoradas pela area administrativa</p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100">
+                <img class="h-6 w-6" src="/uploads/icon/box.svg" alt="Empresas">
+            </div>
+        </div>
+    </article>
 
-    <div class="bg-white p-6 rounded-2xl border border-slate-200">
-        <h3 class="text-slate-400 text-sm font-medium mb-4">Novas Contas (24h)</h3>
-        <div class="text-4xl font-bold text-food-orange">18</div>
-    </div>
+    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Cadastros Recentes</p>
+        <div class="mt-4 flex items-end justify-between">
+            <div>
+                <p class="text-4xl font-bold text-slate-900">18</p>
+                <p class="mt-2 text-sm text-slate-500">Novas contas registradas nas ultimas 24 horas</p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8L10 18l-6-6"></path>
+                </svg>
+            </div>
+        </div>
+    </article>
 
-    <div class="bg-white p-6 rounded-2xl border border-slate-200">
-        <h3 class="text-slate-400 text-sm font-medium mb-4">Assinaturas Ativas</h3>
-        <div class="text-4xl font-bold text-orange-800">92%</div>
-    </div>
-</div>
+    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Retencao</p>
+        <div class="mt-4 flex items-end justify-between">
+            <div>
+                <p class="text-4xl font-bold text-slate-900">92%</p>
+                <p class="mt-2 text-sm text-slate-500">Base ativa com boa continuidade de uso</p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17l3-3 3 3m0-6l-3-3-3 3"></path>
+                </svg>
+            </div>
+        </div>
+    </article>
+</section>
 
-<div class="mt-8 flex flex-col sm:flex-row gap-4">
-    <a href="/" class="bg-slate-200 text-slate-700 px-6 py-2 rounded-lg font-bold hover:bg-slate-300 transition-colors text-sm text-center">Ver Site</a>
-    <button class="bg-food-orange text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600 transition-colors text-sm shadow-lg shadow-orange-500/20">Configurações do Sistema</button>
-</div>
+<section class="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr,1fr]">
+    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-4">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Prioridades</p>
+                <h3 class="mt-2 text-xl font-bold text-slate-900">Frentes administrativas mais importantes</h3>
+            </div>
+            <a href="/admin/companies" class="rounded-xl bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-700 transition-colors hover:bg-orange-100">
+                Ver empresas
+            </a>
+        </div>
+
+        <div class="mt-6 grid gap-4 md:grid-cols-3">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-semibold text-slate-900">Expansao da base</p>
+                <p class="mt-2 text-sm text-slate-500">Consolidar novos cadastros e manter onboarding saudavel.</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-semibold text-slate-900">Qualidade do catalogo</p>
+                <p class="mt-2 text-sm text-slate-500">Revisar pendencias do catalogo global e acelerar moderacao.</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-semibold text-slate-900">Estabilidade</p>
+                <p class="mt-2 text-sm text-slate-500">Acompanhar saude geral e reduzir friccao operacional.</p>
+            </div>
+        </div>
+    </article>
+
+    <article class="rounded-[1.75rem] border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-6 shadow-sm">
+        <p class="text-xs font-bold uppercase tracking-[0.22em] text-orange-700">Atalhos</p>
+        <h3 class="mt-2 text-xl font-bold text-slate-900">Acoes rapidas</h3>
+        <div class="mt-6 space-y-3">
+            <a href="/admin/companies" class="flex items-center justify-between rounded-2xl border border-orange-100 bg-white px-4 py-4 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:text-food-orange hover:shadow-sm">
+                Gerenciar empresas
+                <span class="text-orange-400">→</span>
+            </a>
+            <a href="/admin/global-catalog" class="flex items-center justify-between rounded-2xl border border-orange-100 bg-white px-4 py-4 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:text-food-orange hover:shadow-sm">
+                Moderar catalogo global
+                <span class="text-orange-400">→</span>
+            </a>
+            <a href="/" class="flex items-center justify-between rounded-2xl border border-orange-100 bg-white px-4 py-4 text-sm font-semibold text-slate-700 transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:text-food-orange hover:shadow-sm">
+                Voltar para o site
+                <span class="text-orange-400">→</span>
+            </a>
+        </div>
+    </article>
+</section>

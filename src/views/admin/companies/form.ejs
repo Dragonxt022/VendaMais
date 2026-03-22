@@ -1,0 +1,96 @@
+<section class="mb-8 rounded-[2rem] border border-orange-100 bg-white p-6 shadow-sm md:p-8">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <p class="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-orange-700">Empresas</p>
+            <h2 class="text-3xl font-bold text-slate-900"><%= pageTitle %></h2>
+            <p class="mt-3 max-w-2xl text-slate-500">
+                <%= formMode === 'create' ? 'Crie uma nova empresa com espaco para o formulario crescer no futuro.' : 'Atualize dados, plano, status e identidade visual da empresa.' %>
+            </p>
+        </div>
+        <a href="/admin/companies" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50">
+            Voltar para listagem
+        </a>
+    </div>
+</section>
+
+<section class="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr,0.8fr]">
+    <form action="<%= formMode === 'create' ? '/admin/companies' : '/admin/companies/' + company.id %>" method="POST" enctype="multipart/form-data" class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Nome da Empresa</label>
+                <input type="text" name="name" value="<%= company.name || '' %>" required class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">CNPJ</label>
+                <input type="text" name="cnpj" value="<%= company.cnpj || '' %>" required class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20" placeholder="00.000.000/0000-00">
+            </div>
+
+            <div>
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Plano</label>
+                <select name="plan" class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                    <option value="basic" <%= company.plan === 'basic' ? 'selected' : '' %>>Basic</option>
+                    <option value="pro" <%= company.plan === 'pro' ? 'selected' : '' %>>Pro</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Status</label>
+                <select name="status" class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                    <option value="active" <%= company.status === 'active' ? 'selected' : '' %>>Ativo</option>
+                    <option value="inactive" <%= company.status === 'inactive' ? 'selected' : '' %>>Inativo</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="mb-1 block text-sm font-semibold text-slate-700">Logo da empresa</label>
+                <input type="file" name="logo" accept="image/*" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-all file:mr-4 file:rounded-lg file:border-0 file:bg-orange-50 file:px-4 file:py-2 file:font-semibold file:text-orange-700 hover:file:bg-orange-100">
+            </div>
+
+            <% if (formMode === 'edit' && company.logo_url) { %>
+                <div class="md:col-span-2">
+                    <label class="inline-flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                        <input type="checkbox" name="removeLogo" value="true" class="h-4 w-4 rounded border-slate-300 text-food-orange focus:ring-food-orange">
+                        Remover logo atual
+                    </label>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="mt-8 flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
+            <a href="/admin/companies" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50">
+                Cancelar
+            </a>
+            <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-food-orange px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200/60 transition-colors hover:bg-orange-600">
+                <%= submitLabel %>
+            </button>
+        </div>
+    </form>
+
+    <aside class="space-y-6">
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Preview</p>
+            <div class="mt-4 flex aspect-square items-center justify-center overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-50">
+                <% if (company.logo_url) { %>
+                    <img src="<%= company.logo_url %>" alt="Logo da empresa" class="h-full w-full object-contain p-6">
+                <% } else { %>
+                    <div class="flex flex-col items-center text-slate-400">
+                        <img class="h-10 w-10 opacity-40" src="/uploads/icon/box.svg" alt="">
+                        <span class="mt-2 text-sm">Sem logo definida</span>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+        <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Orientacoes</p>
+            <div class="mt-4 space-y-3 text-sm text-slate-500">
+                <p>Use esta pagina para formularios mais completos, com espaco para licencas, configuracoes financeiras e informacoes operacionais.</p>
+                <p>O fluxo em pagina dedicada ajuda quando a empresa tiver mais campos e regras de validacao.</p>
+                <% if (formMode === 'edit') { %>
+                    <p>Apos salvar, voce retorna para a listagem com os dados atualizados.</p>
+                <% } %>
+            </div>
+        </section>
+    </aside>
+</section>

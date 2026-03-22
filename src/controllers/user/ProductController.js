@@ -1,25 +1,23 @@
 const { Product, Category, Supplier, Sequelize } = require('../../models');
 const { Op } = Sequelize;
-const { createUploadMiddleware } = require('../../middleware/uploadMiddleware');
 const imageService = require('../../services/imageService');
+const { normalizeCurrencyInput } = require('../../utils');
 
 module.exports = {
-  // List all products for the company with pagination, search, and filtering
   async listProducts(req, res) {
     try {
       const { company_id } = req.user;
-      const { 
-        page = 1, 
-        limit = 20, 
-        search = '', 
-        category_id = '', 
-        sort = 'favorite' 
+      const {
+        page = 1,
+        limit = 20,
+        search = '',
+        category_id = '',
+        sort = 'favorite'
       } = req.query;
 
       const offset = (page - 1) * limit;
-      
       const where = { company_id };
-      
+
       if (search) {
         where[Op.or] = [
           { name: { [Op.like]: `%${search}%` } },
@@ -31,7 +29,6 @@ module.exports = {
         where.category_id = category_id;
       }
 
-      // Ordering logic
       let order = [['createdAt', 'DESC']];
       if (sort === 'favorite') {
         order = [
@@ -47,23 +44,23 @@ module.exports = {
           { model: Supplier, attributes: ['id', 'name'] }
         ],
         order,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
+        limit: parseInt(limit, 10),
+        offset: parseInt(offset, 10),
         distinct: true
       });
-      
+
       const categories = await Category.findAll({ where: { company_id } });
       const suppliers = await Supplier.findAll({ where: { company_id } });
 
-      return { 
-        products, 
-        categories, 
+      return {
+        products,
+        categories,
         suppliers,
         pagination: {
           total: count,
           pages: Math.ceil(count / limit),
-          currentPage: parseInt(page),
-          currentLimit: parseInt(limit)
+          currentPage: parseInt(page, 10),
+          currentLimit: parseInt(limit, 10)
         },
         filters: {
           search,
@@ -77,33 +74,35 @@ module.exports = {
     }
   },
 
-  // Create a new product
   async createProduct(req, res) {
     try {
-      console.log('[CREATE PRODUCT] Iniciando criação de produto');
-      console.log('[CREATE PRODUCT] req.body:', req.body);
-      console.log('[CREATE PRODUCT] req.file:', req.file ? 'Arquivo presente' : 'Sem arquivo');
-      
       const { company_id } = req.user;
-      const { name, sku, ean, description, price, cost, min_stock, initial_stock, category_id, supplier_id, manage_stock } = req.body;
-      
-      console.log('[CREATE PRODUCT] Dados extraídos:', { name, sku, price, cost, initial_stock, min_stock });
-      
-      let imageUrl = null;
-      if (req.file) {
-        const imageData = imageService.processUploadedImage(req.file, 'products');
-        imageUrl = imageData.relativePath;
-        console.log('[CREATE PRODUCT] Imagem processada:', imageUrl);
-      }
-      
-      console.log('[CREATE PRODUCT] Criando produto no banco...');
-      const product = await Product.create({
-        company_id,
+      const {
         name,
         sku,
         description,
         price,
         cost,
+        min_stock,
+        initial_stock,
+        category_id,
+        supplier_id,
+        manage_stock
+      } = req.body;
+
+      let imageUrl = null;
+      if (req.file) {
+        const imageData = imageService.processUploadedImage(req.file, 'products');
+        imageUrl = imageData.relativePath;
+      }
+
+      const product = await Product.create({
+        company_id,
+        name,
+        sku,
+        description,
+        price: normalizeCurrencyInput(price),
+        cost: normalizeCurrencyInput(cost),
         stock_quantity: initial_stock || 0,
         min_stock: min_stock || 0,
         manage_stock: manage_stock === 'on' || manage_stock === true,
@@ -111,33 +110,42 @@ module.exports = {
         supplier_id: supplier_id || null,
         image_url: imageUrl
       });
-      
-      console.log('[CREATE PRODUCT] Produto criado com sucesso:', product.id);
+
       return { product };
     } catch (err) {
-      console.error('[CREATE PRODUCT] ERRO:', err);
       throw err;
     }
   },
 
-  // Update a product
   async updateProduct(req, res) {
     try {
       const { company_id } = req.user;
       const { id } = req.params;
-      const { name, sku, ean, description, price, cost, min_stock, category_id, supplier_id, manage_stock, removeImage } = req.body;
+      const {
+        name,
+        sku,
+        description,
+        price,
+        cost,
+        min_stock,
+        category_id,
+        supplier_id,
+        manage_stock,
+        removeImage
+      } = req.body;
 
       const product = await Product.findOne({ where: { id, company_id } });
-      if (!product) throw new Error('Produto não encontrado');
+      if (!product) {
+        throw new Error('Produto nao encontrado');
+      }
 
       let imageUrl = product.image_url;
 
-      // Handle image upload or removal
       if (req.file) {
-        // Delete old image if exists
         if (product.image_url) {
           imageService.deleteImage(product.image_url);
         }
+
         const imageData = imageService.processUploadedImage(req.file, 'products');
         imageUrl = imageData.relativePath;
       } else if (removeImage === 'true' && product.image_url) {
@@ -149,8 +157,8 @@ module.exports = {
         name,
         sku,
         description,
-        price,
-        cost,
+        price: normalizeCurrencyInput(price),
+        cost: normalizeCurrencyInput(cost),
         min_stock: min_stock || 0,
         manage_stock: manage_stock === 'on' || manage_stock === true,
         category_id: category_id || null,
@@ -164,56 +172,59 @@ module.exports = {
     }
   },
 
-  // Toggle favorite status
   async toggleFavorite(req, res) {
     try {
       const { company_id } = req.user;
       const { id } = req.params;
 
       const product = await Product.findOne({ where: { id, company_id } });
-      if (!product) throw new Error('Produto não encontrado');
+      if (!product) {
+        throw new Error('Produto nao encontrado');
+      }
 
       await product.update({ is_favorite: !product.is_favorite });
-
       return { success: true, is_favorite: product.is_favorite };
     } catch (err) {
       throw err;
     }
   },
 
-  // Duplicate a product
   async duplicateProduct(req, res) {
     try {
       const { company_id } = req.user;
       const { id } = req.params;
 
       const original = await Product.findOne({ where: { id, company_id } });
-      if (!original) throw new Error('Produto original não encontrado');
+      if (!original) {
+        throw new Error('Produto original nao encontrado');
+      }
 
       const data = original.toJSON();
       delete data.id;
       delete data.createdAt;
       delete data.updatedAt;
       delete data.deletedAt;
-      
-      data.name = `${data.name} (Cópia)`;
-      if (data.sku) data.sku = `${data.sku}-COPY`;
+
+      data.name = `${data.name} (Copia)`;
+      if (data.sku) {
+        data.sku = `${data.sku}-COPY`;
+      }
 
       const copy = await Product.create(data);
-
       return { success: true, product: copy };
     } catch (err) {
       throw err;
     }
   },
 
-  // Bulk delete products
   async bulkDelete(req, res) {
     try {
       const { company_id } = req.user;
-      const { ids } = req.body; // Array of IDs
+      const { ids } = req.body;
 
-      if (!ids || !Array.isArray(ids)) throw new Error('IDs inválidos');
+      if (!ids || !Array.isArray(ids)) {
+        throw new Error('IDs invalidos');
+      }
 
       await Product.destroy({
         where: {
@@ -228,49 +239,47 @@ module.exports = {
     }
   },
 
-// Bulk adjust products
   async bulkAdjust(req, res) {
     try {
       const { company_id } = req.user;
       const { ids, type, value, mode } = req.body;
 
-      if (!ids || !Array.isArray(ids)) throw new Error('IDs inválidos');
+      if (!ids || !Array.isArray(ids)) {
+        throw new Error('IDs invalidos');
+      }
 
       const products = await Product.findAll({ where: { id: ids, company_id } });
-      const val = parseFloat(value);
-      
-      let updatedProducts = [];
-      let skippedProducts = [];
+      const val = normalizeCurrencyInput(value);
+      const updatedProducts = [];
+      const skippedProducts = [];
 
       for (const product of products) {
-        let updateData = {};
+        const updateData = {};
         let shouldUpdate = false;
-        
+
         if (type === 'price') {
-          let newPrice = mode === 'fixed' ? val : product.price * (1 + val / 100);
+          const newPrice = mode === 'fixed' ? val : Number(product.price) * (1 + val / 100);
           updateData.price = Math.max(0, newPrice);
           shouldUpdate = true;
         } else if (type === 'cost') {
-          let newCost = mode === 'fixed' ? val : product.cost * (1 + val / 100);
+          const newCost = mode === 'fixed' ? val : Number(product.cost || 0) * (1 + val / 100);
           updateData.cost = Math.max(0, newCost);
           shouldUpdate = true;
         } else if (type === 'stock') {
-          // 🔥 CORREÇÃO DO BUG: Só atualiza estoque se o produto for gerenciável
           if (product.manage_stock) {
-            let newStock = mode === 'fixed' ? val : product.stock_quantity + val;
-            updateData.stock_quantity = Math.max(0, newStock);
+            const newStock = mode === 'fixed' ? val : Number(product.stock_quantity || 0) + val;
+            updateData.stock_quantity = Math.max(0, Math.round(newStock));
             shouldUpdate = true;
           } else {
-            // Produto não gerenciável - não atualiza estoque
             skippedProducts.push({
               id: product.id,
               name: product.name,
-              reason: 'Produto não possui gerenciamento de estoque habilitado'
+              reason: 'Produto nao possui gerenciamento de estoque habilitado'
             });
             continue;
           }
         }
-        
+
         if (shouldUpdate) {
           await product.update(updateData);
           updatedProducts.push({
@@ -281,15 +290,14 @@ module.exports = {
         }
       }
 
-      const result = { 
+      const result = {
         success: true,
         updated: updatedProducts.length,
         skipped: skippedProducts.length
       };
 
-      // Adicionar informações sobre produtos pulados se houver
       if (skippedProducts.length > 0) {
-        result.warning = `${skippedProducts.length} produtos não foram atualizados por não possuírem gerenciamento de estoque`;
+        result.warning = `${skippedProducts.length} produtos nao foram atualizados por nao possuirem gerenciamento de estoque`;
         result.skippedProducts = skippedProducts;
       }
 
@@ -299,13 +307,14 @@ module.exports = {
     }
   },
 
-  // Lightweight search for autocomplete
   async search(req, res) {
     try {
       const { company_id } = req.user;
       const { q } = req.query;
 
-      if (!q || q.length < 2) return res.json([]);
+      if (!q || q.length < 2) {
+        return res.json([]);
+      }
 
       const products = await Product.findAll({
         where: {

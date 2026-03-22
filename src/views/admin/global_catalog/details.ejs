@@ -1,173 +1,170 @@
-<div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 text-white p-8 rounded-3xl mb-8">
-    <div class="flex items-start gap-4">
-        <a href="/admin/global-catalog" class="mt-1 p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        </a>
-        <div>
-            <div class="flex items-center gap-3">
-                <h1 class="text-2xl font-bold"><%= product.nome_produto %></h1>
-                <% const statusColors = { 
-                    'pendente': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-                    'validado': 'bg-green-500/20 text-green-400 border-green-500/30',
-                    'rejeitado': 'bg-red-500/20 text-red-400 border-red-500/30',
-                    'arquivado': 'bg-slate-500/20 text-slate-400 border-slate-500/30'
-                } %>
-                <span class="px-3 py-1 rounded-full text-xs font-bold border <%= statusColors[product.status] %>">
-                    <%= product.status.toUpperCase() %>
-                </span>
+<section class="mb-8 rounded-[2rem] border border-orange-100 bg-white p-6 shadow-sm md:p-8">
+    <div class="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+        <div class="flex items-start gap-4">
+            <a href="/admin/global-catalog" class="mt-1 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 text-slate-500 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-food-orange">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+            </a>
+            <div>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-orange-700">Revisao de Produto</p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-3xl font-bold text-slate-900"><%= product.nome_produto %></h2>
+                    <% const statusColors = { 
+                        'pendente': 'bg-amber-100 text-amber-700',
+                        'validado': 'bg-emerald-100 text-emerald-700',
+                        'rejeitado': 'bg-red-100 text-red-700',
+                        'arquivado': 'bg-slate-100 text-slate-700'
+                    }; %>
+                    <span class="rounded-full px-3 py-1 text-xs font-bold <%= statusColors[product.status] %>">
+                        <%= product.status.toUpperCase() %>
+                    </span>
+                </div>
+                <p class="mt-2 text-sm text-slate-500">EAN: <span class="font-mono"><%= product.ean %></span> • Confianca: <%= product.nivel_confianca %>%</p>
             </div>
-            <p class="text-slate-400 text-sm mt-1">EAN: <span class="font-mono text-slate-300"><%= product.ean %></span> • Confiança: <%= product.nivel_confianca %>%</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <% if (product.status !== 'validado') { %>
+                <form action="/admin/global-catalog/<%= product.ean %>/status" method="POST">
+                    <input type="hidden" name="status" value="validado">
+                    <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-emerald-700">Aprovar produto</button>
+                </form>
+            <% } %>
+            <% if (product.status !== 'rejeitado') { %>
+                <button onclick="openRejectModal()" class="rounded-xl border border-red-200 px-4 py-3 text-sm font-bold text-red-600 transition-colors hover:bg-red-50">Rejeitar</button>
+            <% } %>
         </div>
     </div>
-    <div class="mt-4 md:mt-0 flex gap-2">
-        <% if (product.status !== 'validado') { %>
-        <form action="/admin/global-catalog/<%= product.ean %>/status" method="POST" class="inline">
-            <input type="hidden" name="status" value="validado">
-            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-bold hover:bg-green-600 transition-colors shadow-lg shadow-green-500/20 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                Aprovar Produto
-            </button>
+</section>
+
+<section class="grid grid-cols-1 gap-6 xl:grid-cols-[1.55fr,1fr]">
+    <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="mb-6">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Edicao</p>
+            <h3 class="mt-2 text-xl font-bold text-slate-900">Dados principais do produto</h3>
+        </div>
+
+        <form action="/admin/global-catalog/<%= product.ean %>/update" method="POST">
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div class="md:col-span-2">
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">Nome do Produto</label>
+                    <input type="text" name="nome_produto" value="<%= product.nome_produto %>" class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">Categoria Sugerida</label>
+                    <input type="text" name="categoria_sugerida" value="<%= product.categoria_sugerida %>" class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">Marca</label>
+                    <input type="text" name="marca" value="<%= product.marca %>" class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">Modelo</label>
+                    <input type="text" name="modelo" value="<%= product.modelo %>" class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">NCM</label>
+                    <input type="text" name="ncm" value="<%= product.ncm %>" class="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="mb-1 block text-sm font-semibold text-slate-700">URL da Imagem</label>
+                    <input type="text" name="foto_url" value="<%= product.foto_url %>" class="w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm outline-none transition-all focus:border-food-orange focus:ring-2 focus:ring-food-orange/20">
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button type="submit" class="rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-slate-800">Salvar alteracoes</button>
+            </div>
         </form>
-        <% } %>
-        <% if (product.status !== 'rejeitado') { %>
-        <button onclick="document.getElementById('rejectModal').classList.remove('hidden')" class="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg text-sm font-bold border border-red-500/20 hover:bg-red-500 hover:text-white transition-colors">
-            Rejeitar
-        </button>
-        <% } %>
-    </div>
-</div>
+    </article>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <div class="lg:col-span-2 space-y-8">
-        <!-- Main Info Form -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-slate-900">Dados do Produto</h3>
-            </div>
-            
-            <form action="/admin/global-catalog/<%= product.ean %>/update" method="POST">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nome do Produto</label>
-                        <input type="text" name="nome_produto" value="<%= product.nome_produto %>" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-food-orange">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Categoria Sugerida</label>
-                        <input type="text" name="categoria_sugerida" value="<%= product.categoria_sugerida %>" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-food-orange">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Marca</label>
-                        <input type="text" name="marca" value="<%= product.marca %>" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-food-orange">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Modelo</label>
-                        <input type="text" name="modelo" value="<%= product.modelo %>" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-food-orange">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">NCM</label>
-                        <input type="text" name="ncm" value="<%= product.ncm %>" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-food-orange">
-                    </div>
-
-                    <div class="col-span-2">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">URL da Imagem</label>
-                        <input type="text" name="foto_url" value="<%= product.foto_url %>" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-food-orange text-sm font-mono">
-                    </div>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end">
-                    <button type="submit" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-slate-800 transition-colors">
-                        Salvar Alterações
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="space-y-8">
-        <!-- Image Preview -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-900 mb-4">Pré-visualização</h3>
-            <div class="aspect-square bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center border border-slate-200">
+    <div class="space-y-6">
+        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Preview</p>
+            <div class="mt-4 flex aspect-square items-center justify-center overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-50">
                 <% if (product.foto_url) { %>
-                    <img src="<%= product.foto_url %>" alt="" class="w-full h-full object-contain p-4">
+                    <img src="<%= product.foto_url %>" alt="" class="h-full w-full object-contain p-4">
                 <% } else { %>
-                    <div class="text-slate-400 flex flex-col items-center">
-                        <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span class="text-sm">Sem imagem</span>
+                    <div class="flex flex-col items-center text-slate-400">
+                        <img class="h-10 w-10 opacity-40" src="/uploads/icon/box-produtos.svg" alt="">
+                        <span class="mt-2 text-sm">Sem imagem</span>
                     </div>
                 <% } %>
             </div>
-        </div>
+        </article>
 
-        <!-- Metadata -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-900 mb-4">Informações do Sistema</h3>
-            <div class="space-y-4 text-sm">
-                <div class="flex justify-between py-2 border-b border-slate-50">
+        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Metadados</p>
+            <div class="mt-4 space-y-3 text-sm">
+                <div class="flex justify-between gap-4 border-b border-slate-100 pb-3">
                     <span class="text-slate-500">Origem</span>
-                    <span class="font-medium text-slate-900"><%= product.origem %></span>
+                    <span class="font-semibold text-slate-900"><%= product.origem %></span>
                 </div>
-                <div class="flex justify-between py-2 border-b border-slate-50">
+                <div class="flex justify-between gap-4 border-b border-slate-100 pb-3">
                     <span class="text-slate-500">Fontes</span>
-                    <span class="font-medium text-slate-900"><%= product.quantidade_fontes %> contribuições</span>
+                    <span class="font-semibold text-slate-900"><%= product.quantidade_fontes %> contribuicoes</span>
                 </div>
-                <div class="flex justify-between py-2 border-b border-slate-50">
+                <div class="flex justify-between gap-4 border-b border-slate-100 pb-3">
                     <span class="text-slate-500">Criado em</span>
-                    <span class="font-medium text-slate-900"><%= new Date(product.data_primeiro_cadastro).toLocaleDateString() %></span>
+                    <span class="font-semibold text-slate-900"><%= new Date(product.data_primeiro_cadastro).toLocaleDateString() %></span>
                 </div>
-                <div class="flex justify-between py-2 border-b border-slate-50">
-                    <span class="text-slate-500">Última verificação</span>
-                    <span class="font-medium text-slate-900"><%= product.data_ultima_verificacao ? new Date(product.data_ultima_verificacao).toLocaleDateString() : '-' %></span>
+                <div class="flex justify-between gap-4 border-b border-slate-100 pb-3">
+                    <span class="text-slate-500">Ultima verificacao</span>
+                    <span class="font-semibold text-slate-900"><%= product.data_ultima_verificacao ? new Date(product.data_ultima_verificacao).toLocaleDateString() : '-' %></span>
                 </div>
                 <% if (product.moderator) { %>
-                <div class="flex justify-between py-2 border-b border-slate-50">
-                    <span class="text-slate-500">Moderado por</span>
-                    <span class="font-medium text-slate-900"><%= product.moderator.name || product.moderator.email %></span>
-                </div>
+                    <div class="flex justify-between gap-4">
+                        <span class="text-slate-500">Moderado por</span>
+                        <span class="font-semibold text-slate-900"><%= product.moderator.name || product.moderator.email %></span>
+                    </div>
                 <% } %>
             </div>
-        </div>
+        </article>
 
-        <!-- History -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-900 mb-4">Histórico Recente</h3>
-            <div class="space-y-4">
+        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Historico</p>
+            <div class="mt-4 space-y-4">
                 <% if (product.GlobalProductHistories && product.GlobalProductHistories.length > 0) { %>
                     <% product.GlobalProductHistories.slice(0, 5).forEach(history => { %>
-                    <div class="border-l-2 border-slate-200 pl-4 py-1">
-                        <div class="text-xs text-slate-400 mb-0.5"><%= new Date(history.created_at).toLocaleDateString() %></div>
-                        <div class="text-sm font-medium text-slate-800"><%= history.motivo || 'Atualização' %></div>
-                        <div class="text-xs text-slate-500">
-                             <%= history.contributor ? history.contributor.name : 'Sistema' %>
+                        <div class="border-l-2 border-orange-200 pl-4">
+                            <p class="text-xs text-slate-400"><%= new Date(history.createdAt || history.created_at).toLocaleDateString() %></p>
+                            <p class="mt-1 text-sm font-semibold text-slate-900"><%= history.motivo || 'Atualizacao' %></p>
+                            <p class="mt-1 text-xs text-slate-500"><%= history.contributor ? history.contributor.name : 'Sistema' %></p>
                         </div>
-                    </div>
                     <% }) %>
                 <% } else { %>
-                    <p class="text-sm text-slate-500">Sem histórico.</p>
+                    <p class="text-sm text-slate-500">Sem historico recente.</p>
                 <% } %>
             </div>
-        </div>
+        </article>
     </div>
-</div>
+</section>
 
-<!-- Reject Modal -->
-<div id="rejectModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
-        <h3 class="text-lg font-bold text-slate-900 mb-2">Rejeitar Produto</h3>
-        <p class="text-slate-500 text-sm mb-4">Por favor, informe o motivo da rejeição. Isso ficará registrado no histórico.</p>
-        
-        <form action="/admin/global-catalog/<%= product.ean %>/status" method="POST">
+<div id="rejectModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-2xl">
+        <h3 class="text-xl font-bold text-slate-900">Rejeitar produto</h3>
+        <p class="mt-2 text-sm text-slate-500">Informe o motivo da rejeicao para registrar essa decisao no historico.</p>
+        <form action="/admin/global-catalog/<%= product.ean %>/status" method="POST" class="mt-5">
             <input type="hidden" name="status" value="rejeitado">
-            <textarea name="motivo" rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 mb-4" placeholder="Motivo da rejeição..." required></textarea>
-            
-            <div class="flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('rejectModal').classList.add('hidden')" class="px-4 py-2 text-slate-600 font-bold text-sm hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-red-500 text-white font-bold text-sm rounded-lg hover:bg-red-600 transition-colors">Confirmar Rejeição</button>
+            <textarea name="motivo" rows="4" required class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition-all focus:border-red-500 focus:ring-2 focus:ring-red-500/10" placeholder="Motivo da rejeicao..."></textarea>
+            <div class="mt-5 flex justify-end gap-3">
+                <button type="button" onclick="closeRejectModal()" class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50">Cancelar</button>
+                <button type="submit" class="rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-red-700">Confirmar rejeicao</button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function openRejectModal() {
+        const modal = document.getElementById('rejectModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeRejectModal() {
+        const modal = document.getElementById('rejectModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>

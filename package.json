@@ -14,7 +14,8 @@
     "test": "jest --runInBand",
     "db:seed": "node src/database/seeders/product_seeder.js",
     "pm2:start": "pm2 start ecosystem.config.js",
-    "db:reset": "node scripts/db-reset.js"
+    "db:reset": "node scripts/db-reset.js",
+    "db:migrate:safe": "node scripts/db-migrate-safe.js"
   },
   "dependencies": {
     "@casl/ability": "^6.8.0",
@@ -33,6 +34,7 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "mysql2": "^3.16.0",
+    "numeral": "^2.0.6",
     "sequelize": "^6.37.7",
     "sqlite3": "^6.0.1"
   },
